@@ -62,7 +62,7 @@ class WinAdmin(ttk.Frame):
         
         # Cabecera de la cuenta
         self.frame_top_cuenta = ttk.LabelFrame(self)
-        self.lb_cuenta = Label(self.frame_top_cuenta, text="Cuenta Cliente", style="Custom.TLabel")
+        self.lb_cuenta = Label(self.frame_top_cuenta, text="Cuenta Entrante", style="Custom.TLabel")
         self.lb_cuenta.grid(row=0, column=0, padx=10, pady=15,columnspan=2)
         
         self.lb_total = ttk.Label(self.frame_top_cuenta, text="Total", style="Custom.TLabel")
@@ -75,20 +75,20 @@ class WinAdmin(ttk.Frame):
         self.frame_top_cuenta.grid(row=0, column=1, rowspan=2,sticky="nsew")
         self.expandir_widget(self.frame_top_cuenta)
         
-        # Bóton para cargar los datos al inventario, salri y log out
+        # Bóton para cargar los datos al inventario, salir y log out
         self.frame_inventario = ttk.LabelFrame(self)
         
         self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Cargar al inventario", command=self.cargar_inventario,style="CustomOperacion.TButton")
         self.btn_cargar_inventario.grid(row=0,column=0, sticky="nsew")
         
         self.btn_salir  = ttk.Button(self.frame_inventario, text="Salir",command=self.salir, style="CustomQuit.TButton")
-        self.btn_salir.grid(row=1, column=0,sticky="nsew")
+        self.btn_salir.grid(row=2, column=0,sticky="nsew")
         
         self.btn_log_out  = ttk.Button(self.frame_inventario, text="Salir Cuenta",command=self.log_out, style="CustomQuit.TButton")
-        self.btn_log_out.grid(row=2, column=0,sticky="nsew")
+        self.btn_log_out.grid(row=1, column=0,sticky="nsew")
         
         self.expandir_widget(self.frame_inventario, row=3, colum=1)
-        self.frame_inventario.grid(row=2, column=1, rowspan=2, sticky="nsew")
+        self.frame_inventario.grid(row=2, column=1, rowspan=3, sticky="nsew")
         
         
         # Frame del buscar de datos
@@ -151,21 +151,21 @@ class WinAdmin(ttk.Frame):
         # Frame lista de productos
         self.frame_lista_producto = ttk.LabelFrame(self)
         self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad])
-        self.frame_lista_producto.grid(row=3, column=0, sticky="nsew")
+        self.frame_lista_producto.grid(row=4, column=0, sticky="nsew")
         
         # Frame Botones
         self.frame_botones = ttk.LabelFrame(self)
         
         self.btn_agregar = ttk.Button(self.frame_botones, text="Agregar", command=self.agregar_producto)
-        self.btn_agregar.grid(row=0, column=0,sticky="nsew")  
+        self.btn_agregar.grid(row=0, column=3,sticky="nsew")  
         self.btn_modificar = ttk.Button(self.frame_botones, text="Modificar", command=self.modificar_producto)
-        self.btn_modificar.grid(row=1, column=0,sticky="nsew")
+        self.btn_modificar.grid(row=0, column=2,sticky="nsew")
         
-        self.expandir_widget(self.frame_botones, colum=1)
-        self.frame_botones.grid(row=2, column=1, sticky="nsew")
+        self.expandir_widget(self.frame_botones, row=1,colum=4)
+        self.frame_botones.grid(row=3, column=0, sticky="nsew")
         
         ## Configurar el frame principal del operario
-        self.rowconfigure(3, weight=3)
+        self.rowconfigure(4, weight=3)
         self.columnconfigure(1, weight=3)
         self.columnconfigure(0, weight=0)
         

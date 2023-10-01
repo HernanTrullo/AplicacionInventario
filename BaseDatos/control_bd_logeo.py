@@ -65,5 +65,7 @@ class BD_Usuario_Mod:
     password="password"
     es_admin = "es_admin"
     list_user = "list_user"
+    nombre = "nombre"
+    apellido = "apellido"
     
 

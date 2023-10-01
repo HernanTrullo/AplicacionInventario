@@ -2,11 +2,9 @@ from tkinter import ttk
 from tkinter import *
 from tkinter.ttk import *
 import utilidades.generc as utl
-
 from BaseDatos.control_bd_logeo import BD_Usuario
 from tkinter import messagebox
 from tkinter import simpledialog
-import App
 
 class WinLogeo(ttk.Frame):
     def __init__(self, root:ttk.Notebook):
@@ -25,32 +23,28 @@ class WinLogeo(ttk.Frame):
         
         self.frame_logeo = ttk.Frame(self)
         self.frame_logeo.grid(row=0,column=1,sticky="nsew")
-        
         self.nameFrame = ttk.Label(self.frame_logeo, text="¡Bienvenido al inicio de sesión!", style="Custom.TLabel")
         self.nameFrame.pack(fill=X, pady=160, padx=20)
         
         # Usuario
         self.lb_user = ttk.Label(self.frame_logeo, text="Usuario", style="Custom.TLabel")
         self.lb_user.pack(fill=X,padx=20, pady=5)
-        
         self.entry_user = ttk.Entry(self.frame_logeo)
         self.entry_user.pack(fill=X,padx=20, pady=5)
         
         # Contraseña
         self.lb_pass = ttk.Label(self.frame_logeo, text="Contraseña", style="Custom.TLabel")
         self.lb_pass.pack(fill=X, padx=20, pady=5)
-        
         self.entry_pass = ttk.Entry(self.frame_logeo, show="*")
         self.entry_pass.pack(fill=X,padx=20, pady=5)
-        
-        
         # Botón de acceso
         self.btn_ingresar = ttk.Button(self.frame_logeo, text="Ingresar", style="Custom.TButton", command=self.login)
         self.btn_ingresar.pack(padx=50, pady=50)
-        
         # Etiqueta de registro
         self.btn_registro = ttk.Button(self.frame_logeo, text="Registrase", style="Clickable.TLabel", command=self.singup)
         self.btn_registro.pack()
+        
+        
         
         # Funciones que crean la apariencia cuando el cursor se para encima
         self.btn_registro.bind("<Enter>", self.on_enter)
@@ -58,6 +52,7 @@ class WinLogeo(ttk.Frame):
         
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=3)
+        
         
     def login(self): 
         if BD_Usuario().es_user_valido(self.entry_user.get(), self.entry_pass.get()):
