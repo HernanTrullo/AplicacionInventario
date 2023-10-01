@@ -1,0 +1,15 @@
+#Clave de admin string
+CLAVEDEADMINISTRADOR1010@2020@3030
+
+# Clave  en hexadecimal
+434c415645444541444d494e4953545241444f523130313040323032304033303330
+
+
+## Ideas para apliación premium
+
+La posibilidad de hacer varias cuentas a la vez, es decir que por ejemplo cuando llegue un
+cliente pues el operario pueda hacer otra cuenta
+
+
+# Programa para instalar 
+pyinstaller --add-data "utilidades;utilidades" --add-data "Operario;Operario" --add-data "Logeo;Logeo"--add-data "Imagenes;Imagenes" --add-data "BaseDatos;BaseDatos" --add-data "Admin;Admin" .\main.py

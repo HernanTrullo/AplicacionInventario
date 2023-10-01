@@ -1,0 +1,14 @@
+{
+    "list_user": [
+        {
+            "user": "admin",
+            "password": "admin",
+            "es_admin": true
+        },
+        {
+            "user": "admin1",
+            "password": "admin1",
+            "es_admin": false
+        }
+    ]
+}
