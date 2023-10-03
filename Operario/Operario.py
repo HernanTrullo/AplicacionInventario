@@ -10,6 +10,7 @@ from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 from tkinter import simpledialog
 import utilidades.generc as utl
+import datetime
    
     
 class WinOperario(ttk.Frame):
@@ -52,14 +53,14 @@ class WinOperario(ttk.Frame):
         self.nombre_op = ttk.Label(self.top_frame, textvariable=self.var_nombre_op, style="Custom.TLabel")
         self.nombre_op.grid(row=0, column=1)
         
-        self.lb_fecha = ttk.Label(self.top_frame, text="Fecha: ", style="Custom.TLabel")
+        self.lb_fecha = ttk.Label(self.top_frame, text="Fecha: ")
         self.lb_fecha.grid(row=1,column=0)
         self.fecha = ttk.Label(self.top_frame, textvariable=self.var_fecha)
         self.fecha.grid(row=1, column=1)
         
         self.lb_hora = ttk.Label(self.top_frame, text="Hora: ", style="Custom.TLabel")
         self.lb_hora.grid(row=2, column=0)
-        self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora)
+        self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora,style="Custom.TLabel")
         self.hora.grid(row=2, column=1)
         
         self.top_frame.grid(row=0,column=0, sticky="nsew")
@@ -144,7 +145,15 @@ class WinOperario(ttk.Frame):
         self.entry_codigo.bind("<Return>", self.agregar_automaticamente)
         self.entry_nombre_producto.bind("<Return>", self.agregar_automaticamente)
         
+        # Agregar fecha y hora
+        self.var_fecha.set(datetime.date.today().strftime('%d/%m/%Y'))
+        self.actualizar_hora()
         
+    def actualizar_hora(self):
+        hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
+        self.var_hora.set(hora_actual)
+        self.after(1000, self.actualizar_hora)
+      
     def vender(self):
         str = self.win_lista_producto.retornar_productos().to_string(index=False, justify="right", line_width=40)
         print(str)

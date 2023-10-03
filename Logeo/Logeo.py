@@ -7,10 +7,10 @@ from tkinter import messagebox
 from tkinter import simpledialog
 
 class WinLogeo(ttk.Frame):
-    def __init__(self, root:ttk.Notebook):
+    def __init__(self, root:ttk.Notebook, app):
         super().__init__(root)
         self.root = root
-        
+        self.app = app
         self.create_widget()
         self.pack(fill="both", expand=True)
         
@@ -54,34 +54,38 @@ class WinLogeo(ttk.Frame):
         self.columnconfigure(1, weight=3)
         
         
-    def login(self): 
-        if BD_Usuario().es_user_valido(self.entry_user.get(), self.entry_pass.get()):
-            if BD_Usuario().es_admin(self.entry_user.get(), self.entry_pass.get()):
+    def login(self):
+        try:
+            resp = BD_Usuario().es_admin(self.entry_user.get(), self.entry_pass.get())
+            if resp[0]:
                 notebok_tabs= self.root.tabs()
                 self.root.tab(notebok_tabs[2], state="normal")
                 self.root.tab(notebok_tabs[1], state="normal")
                 self.root.tab(notebok_tabs[0], state="hidden")
                 self.root.select(notebok_tabs[2])
+                
+                dato = resp[1]
+                self.app.win_operario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
+                self.app.win_admin.var_nombre_op.set(f"{dato[0]} {dato[1]}")
             else:
                 notebok_tabs= self.root.tabs()
                 self.root.tab(notebok_tabs[1], state="normal")
                 self.root.tab(notebok_tabs[0], state="hidden")
                 self.root.select(notebok_tabs[1])
+                self.app.win_operario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
+        except:
+            messagebox.showerror("SOFTTRULLO SOLUCIONES", "Usuario y/o contraseña no válidos")
             
-        else:
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Usuario y/o contraseñas incorrectas!")
-        
         self.clean_entries()
-            
         
     def singup(self):
         clave= simpledialog.askstring("SOFTRULLO SOLUCIONS","      Ingrese contraseña de admin       ", parent=self)
         if clave == "434c415645444541444d494e4953545241444f523130313040323032304033303330": # Clave en hexadecimal
-            list_bd_users = BD_Usuario().retornar_usuarios() # Se requiere acceder a la lista de usuarios
-            list_bd_users.add_user(self.entry_user.get(), self.entry_pass.get(), False) # Se agrega uno  nuevo
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "¡Usuario registrado correctamente!")
+            notebok_tabs= self.root.tabs()
+            self.root.tab(notebok_tabs[3], state="normal")
+            self.root.select(notebok_tabs[3])
         else:
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Contraseña de administrador no válida")
+            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Contraseña de administrador/soporte no válida")
         
         self.clean_entries()
             

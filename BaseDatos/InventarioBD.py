@@ -1,5 +1,4 @@
 import sqlite3
-import pandas as pd
 from tkinter import messagebox
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 import pandas as pd
@@ -19,7 +18,7 @@ class BD_Inventario():
     @classmethod
     def agregar_productos(cls,productos):
         try:
-            str = f"""INSERT INTO Inventario 
+            str = f"""INSERT INTO Inventario
             ({ProductoDB.codigo},{ProductoDB.nombre},{ProductoDB.precio},{ProductoDB.precio_entrada},{ProductoDB.cantidad}) 
             VALUES (?,?,?,?,?)"""
             

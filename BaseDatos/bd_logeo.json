@@ -3,12 +3,17 @@
         {
             "user": "admin",
             "password": "admin",
-            "es_admin": true
+            "es_admin": true,
+            "nombre": "Hernan",
+            "apellido": "Trullo"
+
         },
         {
             "user": "admin1",
             "password": "admin1",
-            "es_admin": false
+            "es_admin": false,
+            "nombre": "Hernan",
+            "apellido": "Trullo"
         }
     ]
 }

@@ -8,7 +8,7 @@ from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
-
+import datetime
 
 class WinAdmin(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -176,8 +176,17 @@ class WinAdmin(ttk.Frame):
         # Agregar producto automaticamente 
         self.entry_codigo.bind("<Return>", self.agregar_automaticamente)
         self.entry_nombre_producto.bind("<Return>", self.agregar_automaticamente)
+        
+        # Agregar fecha y hora
+        self.var_fecha.set(datetime.date.today().strftime('%d/%m/%Y'))
+        self.actualizar_hora()
     
-    
+    def actualizar_hora(self):
+        hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
+        self.var_hora.set(hora_actual)
+        self.after(1000, self.actualizar_hora)
+        
+        
     def salir(self):
         self.app.on_close()
     
