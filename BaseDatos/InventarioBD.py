@@ -114,7 +114,19 @@ class BD_Inventario():
             except:
                 messagebox.showerror("SOFTRULLO SOLUCIONS", "Algo inesperado ha ocurrido con un código interno en la base de datos")
                 
-    
+    @classmethod
+    def retornar_nombres_productos(cls, clave):
+        str = f""" SELECT {ProductoDB.nombre} FROM Inventario
+                            WHERE {ProductoDB.nombre} like '%{clave}%'"""        
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        if len(res) >0:
+            return [nombres[0] for nombres in res]
+        else:
+            raise ExcepBus("Nombre no encontrado")
                 
             
            

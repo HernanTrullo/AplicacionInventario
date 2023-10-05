@@ -101,11 +101,9 @@ class WinAdmin(ttk.Frame):
         
         self.lb_nombre_producto = ttk.Label(self.ingreso_datos, text="Nombre")
         self.lb_nombre_producto.grid(row=0, column=1)
-        self.entry_nombre_producto = ttk.Entry(self.ingreso_datos, textvariable=self.var_buscar_nombre)
+        self.entry_nombre_producto = ttk.Combobox(self.ingreso_datos, textvariable=self.var_buscar_nombre)
         self.entry_nombre_producto.grid(row=1, column=1,sticky="nsew")
-        
-        self.btn_buscar = ttk.Button(self.ingreso_datos, text="Buscar", command=self.buscar_producto)
-        self.btn_buscar.grid(row=1, column=2, sticky="nsew")
+        self.entry_nombre_producto.bind("<KeyRelease>", self.actualizar_nombre_productos)
         
         self.expandir_widget(self.ingreso_datos, colum=3)
         self.ingreso_datos.grid(row=1, column=0,sticky="nsew")
@@ -180,6 +178,12 @@ class WinAdmin(ttk.Frame):
         # Agregar fecha y hora
         self.var_fecha.set(datetime.date.today().strftime('%d/%m/%Y'))
         self.actualizar_hora()
+    
+    def actualizar_nombre_productos(self, event):
+        try:
+            self.entry_nombre_producto['values']=BD.retornar_nombres_productos(self.var_buscar_nombre.get())     
+        except:
+            self.entry_nombre_producto['values'] = [""]
     
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
