@@ -153,15 +153,13 @@ class WinOperario(ttk.Frame):
             self.entry_nombre_producto['values']=BD.retornar_nombres_productos(self.var_buscar_nombre.get())     
         except:
             self.entry_nombre_producto['values'] = [""]
-       
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
         self.after(1000, self.actualizar_hora)
-      
+        
     def vender(self):
         str = self.win_lista_producto.retornar_productos().to_string(index=False, justify="right", line_width=40)
-        print(str)
         resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Esta seguro que desea vender los anteriores productos?)")
         if resp:
             try:
@@ -169,15 +167,14 @@ class WinOperario(ttk.Frame):
                 messagebox.showinfo("SOFTRULLO SOLUCIONS", "Operacion Exitosa!")
                 self.win_lista_producto.vaciar_productos()
                 self.var_saldo_cliente.set(0)
-                self.var_total.set(0)
                 self.var_aporte_cliente.set(0)
-                
-                self.out_total.formatear_valor()
                 self.saldo_cliente.formatear_valor()
+                
+                self.actualizar_precio_total()
                 
             except:
                 messagebox.showerror("SOFTRULLO SOLUCIONS", """Algo inesperado a ocurrido con la base de datos
-                                     por favor comunicarse con el soporte técnico""")
+                                    por favor comunicarse con el soporte técnico""")
     
     
     def calcular_precio(self, event):
@@ -207,7 +204,7 @@ class WinOperario(ttk.Frame):
             self.root.select(notebok_tabs[0])
     
     def controlador_de_foco(self, event):
-       self.foco_frame = event.widget
+        self.foco_frame = event.widget
     
     def agregar_automaticamente(self, event):
         self.buscar_producto()
@@ -246,14 +243,16 @@ class WinOperario(ttk.Frame):
     def agregar_producto(self):
         self.win_lista_producto.agregar_producto(self.retornar_valores_producto())
         self.limpiar_variables()
-        
+        self.actualizar_precio_total()
         
     def eliminar_producto(self):
         self.win_lista_producto.eliminar_producto()
+        self.actualizar_precio_total()
 
     def modificar_producto(self):   
         self.win_lista_producto.modificar_producto(self.retornar_valores_producto())
         self.limpiar_variables()
+        self.actualizar_precio_total()
     
     def expandir_widget(self, frame:ttk.LabelFrame, row=2, colum=2):
         for i in range(row):

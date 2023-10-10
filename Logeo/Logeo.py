@@ -59,6 +59,7 @@ class WinLogeo(ttk.Frame):
             resp = BD_Usuario().es_admin(self.entry_user.get(), self.entry_pass.get())
             if resp[0]:
                 notebok_tabs= self.root.tabs()
+                self.root.tab(notebok_tabs[4], state="normal")
                 self.root.tab(notebok_tabs[2], state="normal")
                 self.root.tab(notebok_tabs[1], state="normal")
                 self.root.tab(notebok_tabs[0], state="hidden")
@@ -67,12 +68,14 @@ class WinLogeo(ttk.Frame):
                 dato = resp[1]
                 self.app.win_operario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 self.app.win_admin.var_nombre_op.set(f"{dato[0]} {dato[1]}")
+                self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
             else:
                 notebok_tabs= self.root.tabs()
                 self.root.tab(notebok_tabs[1], state="normal")
                 self.root.tab(notebok_tabs[0], state="hidden")
                 self.root.select(notebok_tabs[1])
                 self.app.win_operario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
+                self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
         except:
             messagebox.showerror("SOFTTRULLO SOLUCIONES", "Usuario y/o contraseña no válidos")
             

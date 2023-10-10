@@ -30,6 +30,7 @@ class WinAdmin(ttk.Frame):
         self.var_buscar_cod = tk.StringVar()
         
         self.var_total = tk.StringVar()
+        self.var_total_vendido = tk.StringVar()
         
         self.foco_frame = None
         
@@ -62,13 +63,15 @@ class WinAdmin(ttk.Frame):
         
         # Cabecera de la cuenta
         self.frame_top_cuenta = ttk.LabelFrame(self)
-        self.lb_cuenta = Label(self.frame_top_cuenta, text="Cuenta Entrante", style="Custom.TLabel")
-        self.lb_cuenta.grid(row=0, column=0, padx=10, pady=15,columnspan=2)
+        self.lb_cuenta = Label(self.frame_top_cuenta, text="Total_PV", style="Custom13.TLabel")
+        self.lb_cuenta.grid(row=0, column=0, padx=10)
+        self.out_total_vendido = LabelP(self.frame_top_cuenta, textvariable=self.var_total_vendido ,style="Custom13.TLabel") # La salida del total
+        self.out_total_vendido.grid(row=0,column=1,padx=10)
         
-        self.lb_total = ttk.Label(self.frame_top_cuenta, text="Total", style="Custom.TLabel")
+        
+        self.lb_total = ttk.Label(self.frame_top_cuenta, text="Total_PC", style="Custom13.TLabel")
         self.lb_total.grid(row=1, column=0, padx=10)
-        
-        self.out_total = LabelP(self.frame_top_cuenta, textvariable=self.var_total ,style="Custom.TLabel") # La salida del total
+        self.out_total = LabelP(self.frame_top_cuenta, textvariable=self.var_total ,style="Custom13.TLabel") # La salida del total
         self.out_total.grid(row=1,column=1,padx=10)
         
         
@@ -203,12 +206,11 @@ class WinAdmin(ttk.Frame):
             self.root.select(notebok_tabs[0])
     
     def controlador_de_foco(self, event):
-       self.foco_frame = event.widget
+        self.foco_frame = event.widget
     
     def agregar_automaticamente(self, event):
         self.buscar_producto()
         
-      
     def buscar_producto(self):
         if self.foco_frame == self.entry_codigo or self.foco_frame == self.entry_nombre_producto:
             try:
@@ -257,7 +259,7 @@ class WinAdmin(ttk.Frame):
                 
             except:
                 messagebox.showerror("SOFTRULLO SOLUCIONS", """Algo inesperado a ocurrido con la base de datos
-                                     por favor comunicarse con el soporte técnico""")
+                                    por favor comunicarse con el soporte técnico""")
                 
         self.entry_codigo.focus()
             
@@ -266,6 +268,7 @@ class WinAdmin(ttk.Frame):
         self.win_lista_producto.agregar_producto(self.retornar_valores_producto())
         self.limpiar_variables()
         self.cambiar_widget()
+        self.actualizar_precio_total()
         
         self.entry_codigo.focus()
         
@@ -273,7 +276,7 @@ class WinAdmin(ttk.Frame):
         self.win_lista_producto.eliminar_producto()
         self.cambiar_widget()
         self.limpiar_variables()
-        
+        self.actualizar_precio_total()
         self.entry_codigo.focus()
 
     def modificar_producto(self):
@@ -285,7 +288,9 @@ class WinAdmin(ttk.Frame):
             messagebox.showinfo("SOFTRULLO SOLUCIONS", "Producto modificado correctamente")
             
         self.bloquear_botones(False)
+        self.actualizar_precio_total()
         self.entry_codigo.focus()
+    
     
     def expandir_widget(self, frame:ttk.LabelFrame, row=2, colum=2):
         for i in range(row):
@@ -327,7 +332,6 @@ class WinAdmin(ttk.Frame):
             self.btn_agregar.config(state="normal")
             self.btn_cargar_inventario.config(state="normal")
             
-              
     def limpiar_variables(self):
         self.var_descrip_nombre.set("")
         self.var_descrip_cod.set("")
@@ -354,8 +358,11 @@ class WinAdmin(ttk.Frame):
             Producto.cantidad: [self.var_descrip_cantidad.get()]
         }
     
+    # Se actualiza el precio total de entrada y salida que hay en los produstos del list
     def actualizar_precio_total(self):
         self.var_total.set(self.win_lista_producto.calcular_precio_productos_entrada())
-        self.out_total.formatear_valor()
+        self.var_total_vendido.set(self.win_lista_producto.calcular_precio_productos_vendido())
+        self.out_total.formatear_valor() # Formato de peso
+        self.out_total_vendido.formatear_valor() # Formato de peso
         
             

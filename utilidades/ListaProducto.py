@@ -12,6 +12,7 @@ class Producto:
     sub_total = "Sub_Total"
     
 
+
 class ListaProducto(ttk.Treeview):
     def __init__(self, root, win,col):
         self.df = pd.DataFrame()
@@ -41,7 +42,6 @@ class ListaProducto(ttk.Treeview):
         self.bind("<Double-1>", self.doble_click_mod_productos)
         
         # Tecla para elminar producto
-    
         self.bind("<BackSpace>", self.eliminar_producto_auto)
         
         # Configurar la Treeview para que utilice la Scrollbar
@@ -56,7 +56,7 @@ class ListaProducto(ttk.Treeview):
         
     def eliminar_producto_auto(self, event):
         self.eliminar_producto()
-         
+        
     def agregar_producto(self, dict):
         if len(dict) == 4:
             data = {
@@ -76,7 +76,7 @@ class ListaProducto(ttk.Treeview):
                 Producto.sub_total: [dict[Producto.precio][0] * dict[Producto.cantidad][0]]
             }
         
-        
+        # Se coloca [0] pues viene de una lista 
         res = self.df.loc[self.df[Producto.codigo] == data[Producto.codigo][0]]
         if res.empty:
             self.df = pd.concat([self.df, pd.DataFrame(data)], ignore_index=True)
@@ -140,8 +140,7 @@ class ListaProducto(ttk.Treeview):
             self.insert('', 'end', values= list(row)) 
             
         # Se deberia actualizar el precio total ingresado
-        self.win.actualizar_precio_total()
-          
+        #self.win.actualizar_precio_total()
     
     def vaciar_productos(self):
         # Borrar todos
@@ -165,6 +164,15 @@ class ListaProducto(ttk.Treeview):
         precio_total = 0
         for i,row in self.df.iterrows():
             precio = row[Producto.precio_entrada] * row[Producto.cantidad]
+            precio_total +=precio
+        
+        return precio_total
+    
+
+    def calcular_precio_productos_vendido(self):
+        precio_total = 0
+        for i,row in self.df.iterrows():
+            precio = row[Producto.precio] * row[Producto.cantidad]
             precio_total +=precio
         
         return precio_total

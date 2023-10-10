@@ -16,6 +16,21 @@ class BD_Inventario():
     name_bd = "./BaseDatos/BaseDatos.db"
     
     @classmethod
+    def obtener_productos(cls):
+        str = "SELECT * FROM Inventario"
+                    
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res) >0:
+            return res
+        else:
+            raise ExcepBus("No se encunetran productos")
+    
+    @classmethod
     def agregar_productos(cls,productos):
         try:
             str = f"""INSERT INTO Inventario
@@ -68,7 +83,6 @@ class BD_Inventario():
         str = f""" UPDATE Inventario
                     SET {ProductoDB.precio} = {producto[2]}, {ProductoDB.precio_entrada}={producto[3]},{ProductoDB.cantidad} = {producto[4]} 
                     WHERE {ProductoDB.codigo} = '{producto[0]}'"""
-                  
         conn = sqlite3.connect(cls.name_bd)           
         cur = conn.cursor()
         cur.execute(str)
@@ -128,5 +142,3 @@ class BD_Inventario():
         else:
             raise ExcepBus("Nombre no encontrado")
                 
-            
-           

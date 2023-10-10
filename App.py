@@ -7,6 +7,7 @@ from Admin.Admin import WinAdmin
 from tkinter import messagebox
 from style import StyleAPP as sty
 from Registro.Registro import WinRegistro
+from Inventario.Inventario import WinInventario
 
 GLOBAL_user_valido = False
 class App(ttk.Frame):
@@ -36,13 +37,14 @@ class App(ttk.Frame):
         self.win_admin = WinAdmin(self.notebook_windows, self)
         self.win_operario = WinOperario(self.notebook_windows, self)
         self.win_registro = WinRegistro(self.notebook_windows, self)
+        self.win_inventario = WinInventario(self.notebook_windows, self)
         
         # Se asigna cada ventana al notebook_window
         self.notebook_windows.add(self.win_logeo, text="Logeo", padding=5)
         self.notebook_windows.add(self.win_operario, text="Ventas y Operario", padding=5,state="disabled")
         self.notebook_windows.add(self.win_admin, text="Administrador", padding=5, state="disabled")
         self.notebook_windows.add(self.win_registro, text="Registro", padding=5, state="hidden")
-        
+        self.notebook_windows.add(self.win_inventario, text="Inventario", padding=5, state="hidden")
         
         self.notebook_windows.pack(fill="both", expand=True)
         
