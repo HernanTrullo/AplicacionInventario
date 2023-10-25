@@ -9,12 +9,14 @@ from style import StyleAPP as sty
 from Registro.Registro import WinRegistro
 from Inventario.Inventario import WinInventario
 
+
 GLOBAL_user_valido = False
 class App(ttk.Frame):
-    def __init__(self, root:Tk):
+    def __init__(self, root:Tk, delta_time):
         super().__init__(root)
         self.root = root
-        self.style = sty()
+        self.delta_time = delta_time
+        self.style = sty(root)
         self.root.title("Aplicación de Usuario")
         #self.root.attributes("-toolwindow", True)
         #self.root.attributes("-topmost", True,"-toolwindow", True)
@@ -41,8 +43,8 @@ class App(ttk.Frame):
         
         # Se asigna cada ventana al notebook_window
         self.notebook_windows.add(self.win_logeo, text="Logeo", padding=5)
-        self.notebook_windows.add(self.win_operario, text="Ventas y Operario", padding=5,state="disabled")
-        self.notebook_windows.add(self.win_admin, text="Administrador", padding=5, state="disabled")
+        self.notebook_windows.add(self.win_operario, text="Ventas y Operario", padding=5,state="hidden")
+        self.notebook_windows.add(self.win_admin, text="Administrador", padding=5, state="hidden")
         self.notebook_windows.add(self.win_registro, text="Registro", padding=5, state="hidden")
         self.notebook_windows.add(self.win_inventario, text="Inventario", padding=5, state="hidden")
         

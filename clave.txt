@@ -1,8 +1,11 @@
 #Clave de admin string
 CLAVEDEADMINISTRADOR1010@2020@3030
 
-# Clave  en hexadecimal
+# Clave  en hexadecimal de admin
 434c415645444541444d494e4953545241444f523130313040323032304033303330
+
+# Clave de licencia 
+A012-B013-C014-D015
 
 
 ## Ideas para apliación premium
