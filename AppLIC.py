@@ -12,7 +12,7 @@ class AppLIC(ttk.Frame):
     def __init__(self, root:Tk):
         super().__init__(root)
         self.root = root
-        self.style = sty()
+        self.style = sty(root)
         self.root.title("Licencia")
         self.root.geometry("400x300")
         
@@ -25,9 +25,9 @@ class AppLIC(ttk.Frame):
         
         
     def create_widgets(self):
-        self.lb_clave = ttk.Label(self,text="Clave", style="Custom.TLabel").grid(row=2, column=1, sticky="nsew")
-        self.lb_fecha_ini = ttk.Label(self,text="Fecha Inicio", style="Custom.TLabel").grid(row=3, column=1,sticky="nsew")
-        self.lb_habilitar_clave = ttk.Label(self,text="Habilitar Clave", style="Custom.TLabel").grid(row=4, column=1,sticky="nsew")
+        self.lb_clave = ttk.Label(self,text="Clave", style="CustomMedium.TLabel").grid(row=2, column=1, sticky="nsew")
+        self.lb_fecha_ini = ttk.Label(self,text="Fecha Inicio", style="CustomMedium.TLabel").grid(row=3, column=1,sticky="nsew")
+        self.lb_habilitar_clave = ttk.Label(self,text="Habilitar Clave", style="CustomMedium.TLabel").grid(row=4, column=1,sticky="nsew")
         
         self.clave = ttk.Entry(self, textvariable=self.var_clave)
         self.clave.grid(row=2, column=2, sticky="ew")
@@ -35,7 +35,7 @@ class AppLIC(ttk.Frame):
         self.fecha_ini.grid(row=3, column=2, sticky="ew")
         self.ena_clave = ttk.Checkbutton(self,variable=self.var_ena_clave)
         self.ena_clave.grid(row=4, column=2, sticky="ew")
-        self.btn_validar = ttk.Button(self,text="Cargar Licencia",command=self.cargar, style="CustomOperacion.TButton")
+        self.btn_validar = ttk.Button(self,text="Cargar Licencia",command=self.cargar, style="Primary.TButton")
         self.btn_validar.grid(row=5, column=2, sticky="nsew")
         
         for i in range(5):

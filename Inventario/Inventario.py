@@ -131,7 +131,7 @@ class WinInventario(ttk.Frame):
             self.win_lista_producto.agregar_producto(self.retornar_valores_producto(producto))
 
         self.set_valor_total(self.win_lista_producto.calcular_precio_productos())
-        self.set_valor_total_vendido(self.win_lista_producto.calcular_precio_productos_entrada())
+        self.set_valor_total_vendido(self.win_lista_producto.calcular_precio_productos_vendido())
         
     def set_valor_total(self, valor):
         self.var_total.set(valor)
