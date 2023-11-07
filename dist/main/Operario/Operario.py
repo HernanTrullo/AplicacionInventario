@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter.ttk import *
 import pandas as pd
 from tkinter import messagebox
+from tkinter import simpledialog
 import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
@@ -11,6 +12,7 @@ from utilidades.EntryP import LabelP
 from tkinter import simpledialog
 import utilidades.generc as utl
 import datetime
+from BaseDatos.control_bd_variables import BD_Variables as BD_Var
     
 class WinOperario(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -31,6 +33,7 @@ class WinOperario(ttk.Frame):
         self.var_buscar_cod = tk.StringVar()
         
         self.var_total = tk.IntVar()
+        self.var_valor_ventido_op = IntVar()
         
         self.var_aporte_cliente = IntVar()
         self.var_saldo_cliente = IntVar()
@@ -43,7 +46,13 @@ class WinOperario(ttk.Frame):
         self.create_widget()
         self.pack(fill="both", expand=True)
         
+        # Inicializar variables
+        self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
         
+        self.bind("<FocusIn>", self.actualizar)
+        
+    def actualizar(self, event):
+        self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
         self.top_frame = ttk.Frame(self, style="Cabecera.TFrame")
@@ -53,6 +62,11 @@ class WinOperario(ttk.Frame):
         self.nombre_op = ttk.Label(self.top_frame, textvariable=self.var_nombre_op, style="CCustomMedium.TLabel")
         self.nombre_op.grid(row=0, column=1)
         
+        self.lb_valor_vendido_op =  ttk.Label(self.top_frame, text="Valor Vendido: ", style="CCustomMedium.TLabel")
+        self.lb_valor_vendido_op.grid(row=0, column=2, padx=10)
+        self.valor_vendido_op = LabelP(self.top_frame, textvariable=self.var_valor_ventido_op, style="CCustomMedium.TLabel")
+        self.valor_vendido_op.grid(row=0, column=3, padx=10)
+            
         self.lb_fecha = ttk.Label(self.top_frame, text="Fecha: ", style="CCustomLarge.TLabel")
         self.lb_fecha.grid(row=1,column=0)
         self.fecha = ttk.Label(self.top_frame, textvariable=self.var_fecha,style="CCustomSmall.TLabel")
@@ -134,6 +148,7 @@ class WinOperario(ttk.Frame):
         self.frame_lista_producto = ttk.Frame(self)
         self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.cantidad])
         self.frame_lista_producto.grid(row=2, column=0, sticky="nsew")
+        self.win_lista_producto.bind("<BackSpace>", self.eliminar_producto_auto)
         
         ## Configurar el frame principal del operario
         self.columnconfigure(0, weight=0)
@@ -157,6 +172,8 @@ class WinOperario(ttk.Frame):
             self.entry_nombre_producto['values']=BD.retornar_nombres_productos(self.var_buscar_nombre.get())     
         except:
             self.entry_nombre_producto['values'] = [""]
+            
+            
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
@@ -166,18 +183,24 @@ class WinOperario(ttk.Frame):
         resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Esta seguro que desea vender los anteriores productos?")
         if resp:
             try:
-                BD.sacar_productos(self.win_lista_producto.retornar_productos())
+                BD.sacar_productos(self.win_lista_producto.retornar_productos()) # Se sacan los productos de la bases de datos
+                value_total_venta = int(BD_Var.get_valor_ventas_turno()) + self.var_total.get() # Valor total de ventas deñ turno
+                
                 messagebox.showinfo("SOFTRULLO SOLUCIONS", "Operacion Exitosa!")
                 self.win_lista_producto.vaciar_productos()
                 self.var_saldo_cliente.set(0)
                 self.var_aporte_cliente.set(0)
                 self.saldo_cliente.formatear_valor()
-                
                 self.actualizar_precio_total()
+                
+                BD_Var.set_valor_ventas_turno(str(value_total_venta))
+                self.actualizar_valor_vendido(value_total_venta)
                 
             except:
                 messagebox.showerror("SOFTRULLO SOLUCIONS", """Algo inesperado a ocurrido con la base de datos
                                     por favor comunicarse con el soporte técnico""")
+                                    
+                                
     
     
     def calcular_precio(self, event):
@@ -207,6 +230,7 @@ class WinOperario(ttk.Frame):
             self.root.tab(notebok_tabs[1], state="hidden")
             self.root.tab(notebok_tabs[0], state="normal")
             self.root.select(notebok_tabs[0])
+            
     
     def controlador_de_foco(self, event):
         self.foco_frame = event.widget
@@ -215,7 +239,8 @@ class WinOperario(ttk.Frame):
         self.buscar_producto()
     
     def eliminar_producto_auto(self, event):
-        self.win_lista_producto.eliminar_producto()
+        self.eliminar_producto()
+        
         
     def buscar_producto(self):
         if self.foco_frame == self.entry_codigo or self.foco_frame == self.entry_nombre_producto:
@@ -298,6 +323,10 @@ class WinOperario(ttk.Frame):
         # Calcular precio total 
         self.var_total.set(self.win_lista_producto.calcular_precio_productos())
         self.out_total.formatear_valor()
+    
+    def actualizar_valor_vendido (self, value):
+        self.var_valor_ventido_op.set(value)
+        self.valor_vendido_op.formatear_valor()
         
     def format_currency(self,value):
         return "${:,.2f}".format(value)

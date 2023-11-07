@@ -6,11 +6,13 @@ from tkinter import messagebox
 import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
+from BaseDatos.control_bd_variables import BD_Variables
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 import datetime
 import utilidades.generc as utl
 from tktooltip import ToolTip
+from tkinter import simpledialog
 
 class WinAdmin(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -33,6 +35,7 @@ class WinAdmin(ttk.Frame):
         
         self.var_total = tk.StringVar()
         self.var_total_vendido = tk.StringVar()
+        self.var_valor_ventido_op = IntVar()
         
         self.var_delta_time = tk.IntVar()
         
@@ -43,6 +46,14 @@ class WinAdmin(ttk.Frame):
         self.create_widget()
         self.pack(fill="both", expand=True)
         
+        
+        # Inicializar variables
+        self.actualizar_valor_vendido(BD_Variables.get_valor_ventas_turno())
+        
+        self.bind("<FocusIn>", self.actualizar)
+    
+    def actualizar(self, event):
+        self.actualizar_valor_vendido(BD_Variables.get_valor_ventas_turno())
         
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
@@ -68,6 +79,11 @@ class WinAdmin(ttk.Frame):
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_delta_time, style="CCustomLarge.TLabel")
         self.hora.grid(row=2, column=3)
         
+        self.lb_valor_vendido_op =  ttk.Label(self.top_frame, text="Valor Vendido: ", style="CCustomMedium.TLabel")
+        self.lb_valor_vendido_op.grid(row=0, column=2, padx=10)
+        self.valor_vendido_op = LabelP(self.top_frame, textvariable=self.var_valor_ventido_op, style="CCustomMedium.TLabel")
+        self.valor_vendido_op.grid(row=0, column=3, padx=10)
+        
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
         
@@ -88,19 +104,22 @@ class WinAdmin(ttk.Frame):
         self.frame_top_cuenta.grid(row=0, column=1,sticky="nsew", rowspan=3)
         self.expandir_widget(self.frame_top_cuenta)
         
-        # Bóton para cargar los datos al inventario, salir y log out
+        # Bóton para cargar los datos al inventario, salir y log out y cambio de clave
         self.frame_inventario = ttk.Frame(self)
         
         self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Cargar al inventario", command=self.cargar_inventario,style="Primary.TButton")
         self.btn_cargar_inventario.grid(row=0,column=0, sticky="nsew")
         
         self.btn_salir  = ttk.Button(self.frame_inventario, text="Salir",command=self.salir, style="Primary.TButton")
-        self.btn_salir.grid(row=2, column=0,sticky="nsew")
+        self.btn_salir.grid(row=1, column=0,sticky="nsew")
         
-        self.btn_log_out  = ttk.Button(self.frame_inventario, text="Salir Cuenta",command=self.log_out, style="Primary.TButton")
-        self.btn_log_out.grid(row=1, column=0,sticky="nsew")
+        self.btn_log_out  = ttk.Button(self.frame_inventario, text="Corte de Inventario",command=self.log_out, style="Primary.TButton")
+        self.btn_log_out.grid(row=3, column=0,sticky="nsew")
         
-        self.expandir_widget(self.frame_inventario, row=3, colum=1)
+        self.btn_cambiar_clave  = ttk.Button(self.frame_inventario, text="Cambiar Clave",command=self.cambiar_clave, style="Primary.TButton")
+        self.btn_cambiar_clave.grid(row=2, column=0,sticky="nsew")
+        
+        self.expandir_widget(self.frame_inventario, row=4, colum=1)
         self.frame_inventario.grid(row=3, column=1, rowspan=2, sticky="nsew")
         
         
@@ -159,23 +178,28 @@ class WinAdmin(ttk.Frame):
         self.frame_lista_producto = ttk.Frame(self)
         self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad])
         self.frame_lista_producto.grid(row=4, column=0, sticky="nsew")
+        self.win_lista_producto.bind("<BackSpace>", self.eliminar_producto_auto)
         
         # Frame Botones
         self.frame_botones = ttk.Frame(self)
         self.img_mod = utl.leer_imagen("./Imagenes/BTN_Modificar.png", (24,24))
         self.img_add = utl.leer_imagen("./Imagenes/BTN_Agregar.png", (24,24))
+        self.img_per = utl.leer_imagen("./Imagenes/BTN_Agregar.png", (24,24))
         
         self.btn_agregar = ttk.Button(self.frame_botones, image=self.img_add, style="Primary.TButton",command=self.agregar_producto)
-        self.btn_agregar.grid(row=0, column=2, pady=10)  
+        self.btn_agregar.grid(row=0, column=3, pady=10)  
         self.btn_modificar = ttk.Button(self.frame_botones, image=self.img_mod,style="Primary.TButton" ,command=self.modificar_producto)
-        self.btn_modificar.grid(row=0, column=1)
+        self.btn_modificar.grid(row=0, column=2)
+        self.btn_view_percent = ttk.Button(self.frame_botones, text="%",style="Primary.TButton", image=self.img_per)
+        self.btn_view_percent.grid(row=0, column=1)
         
         # Se configuran los tooltip
         ToolTip(self.btn_agregar, "Agregar Producto", delay=0.5)
         ToolTip(self.btn_modificar, "Modificar Producto", delay=0.5)
+        ToolTip(self.btn_view_percent, self.mesaje, delay=0.5)
         
-        self.frame_botones.columnconfigure(0, weight= 8)
-        self.frame_botones.columnconfigure(3, weight= 1)
+        self.frame_botones.columnconfigure(0, weight= 7)
+        self.frame_botones.columnconfigure(4, weight= 1)
         
         
         self.frame_botones.grid(row=3, column=0, sticky="nsew")
@@ -196,6 +220,21 @@ class WinAdmin(ttk.Frame):
         # Agregar fecha y hora
         self.var_fecha.set(datetime.date.today().strftime('%d/%m/%Y'))
         self.actualizar_hora()
+        
+        # Comprobar nombre o codigo
+        self.entry_cod_descrp_producto.bind("<FocusOut>",self.comprobar_codigo_producto)
+        self.entry_nombre_descrp_producto.bind("<FocusOut>",self.comprobar_nombre_producto)
+    
+    def mesaje (self):
+        num = 0
+        try:
+            num = (self.var_descrip_precio.get()-self.var_descrip_precio_entra.get())*(100/self.var_descrip_precio_entra.get())
+        except:
+            pass
+        
+        text = str(int(num)) + " %"
+        
+        return text
     
     def actualizar_nombre_productos(self, event):
         try:
@@ -208,22 +247,65 @@ class WinAdmin(ttk.Frame):
         self.var_hora.set(hora_actual)
         self.after(1000, self.actualizar_hora)
         
+    def comprobar_nombre_producto(self, event):
+        if (BD.esta_el_producto_nombre(self.var_descrip_nombre.get())):
+            messagebox.showwarning("SOFTRULLO SOLUCIONS", "Nombre Duplicado")
+            event.widget.focus()
+    
+    def comprobar_codigo_producto(self, event):
+        if (BD.esta_el_producto_cod(self.var_descrip_cod.get())):
+            messagebox.showwarning("SOFTRULLO SOLUCIONS", "Código Duplicado Duplicado")
+            event.widget.focus()
         
     def salir(self):
         self.app.on_close()
     
-    def log_out(self):
-        if messagebox.askokcancel("Log Out", "¿Estás seguro de que quieres terminar sesión?"):
+    def cambiar_clave(self):
+        clave_nueva = simpledialog.askstring("SOFTRULLO SOLUCIONS", "Digite una clave de admin nueva")
+        clave_antigua = f"{BD_Variables.get_clave_admin()}"
+        respuesta = messagebox.askokcancel("SOFTRULLO SOLUCIONS", f"""La clave antigua es: {clave_antigua}, la nueva es: {clave_nueva} \n¿Está seguro(a) que va a cambiarla?""")
+        
+        if (respuesta):
+            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Clave cambiada correctamente")
+            BD_Variables.set_clave_admin(clave_nueva)
             notebok_tabs= self.root.tabs()
             self.root.tab(notebok_tabs[4], state="hidden")
             self.root.tab(notebok_tabs[2], state="hidden")
             self.root.tab(notebok_tabs[1], state="hidden")
             self.root.tab(notebok_tabs[0], state="normal")
             self.root.select(notebok_tabs[0])
+            
+            
+        
+    
+    def log_out(self):
+        resp = simpledialog.askstring("SOFTRULLO SOLUCIONS", "     Digite la clave de admin     ")
+        if (resp == BD_Variables.get_clave_admin()):
+            if messagebox.askokcancel("Log Out", "¿Estás seguro de que quieres terminar sesión \nAdicionamente, resetear el valor del acumulado?"):
+                # Resetear el valor de las ventas temporales del dia por el operario
+                BD_Variables.reset_valor_ventas_turno()
+                self.actualizar_valor_vendido(0)
+                
+                notebok_tabs= self.root.tabs()
+                self.root.tab(notebok_tabs[4], state="hidden")
+                self.root.tab(notebok_tabs[2], state="hidden")
+                self.root.tab(notebok_tabs[1], state="hidden")
+                self.root.tab(notebok_tabs[0], state="normal")
+                self.root.select(notebok_tabs[0])
+                    
+        else:
+            messagebox.showwarning("SOFTRULLO SOLUCIONS", "¡Tenga cuidado!, la clave debe ser de administrador")
+            
+    def actualizar_valor_vendido (self, value):
+        self.var_valor_ventido_op.set(value)
+        self.valor_vendido_op.formatear_valor()
     
     def controlador_de_foco(self, event):
         self.foco_frame = event.widget
     
+    def eliminar_producto_auto(self, event):
+        self.eliminar_producto()
+        
     def agregar_automaticamente(self, event):
         self.buscar_producto()
         
@@ -263,7 +345,7 @@ class WinAdmin(ttk.Frame):
             
         
     def cargar_inventario(self):
-        resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Esta seguro que desea agregar los productos al inventario?")
+        resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "¿Está seguro que desea agregar los productos al inventario?")
         if resp:
             try:
                 BD.cargar_inventario(self.win_lista_producto.retornar_productos())
@@ -284,12 +366,16 @@ class WinAdmin(ttk.Frame):
             
             
     def agregar_producto(self):
-        self.win_lista_producto.agregar_producto(self.retornar_valores_producto())
-        self.limpiar_variables()
-        self.cambiar_widget()
-        self.actualizar_precio_total()
+        # Se verifica si el código ya está en la base de datos
+        if self.var_descrip_precio.get() > self.var_descrip_precio_entra.get():
+            self.win_lista_producto.agregar_producto(self.retornar_valores_producto())
+            self.limpiar_variables()
+            self.cambiar_widget()
+            self.actualizar_precio_total()
+            self.entry_codigo.focus()
+        else:
+            messagebox.showwarning("SOFTRULLO SOLUCIONS", "El precio de venta es menor que el de compra")
         
-        self.entry_codigo.focus()
         
     def eliminar_producto(self):
         self.win_lista_producto.eliminar_producto()
@@ -375,7 +461,7 @@ class WinAdmin(ttk.Frame):
     def retornar_valores_producto(self):
         return {
             Producto.codigo: [self.var_descrip_cod.get()],
-            Producto.nombre: [self.var_descrip_nombre.get()],
+            Producto.nombre: [self.var_descrip_nombre.get().title()],
             Producto.precio: [self.var_descrip_precio.get()],
             Producto.precio_entrada: [self.var_descrip_precio_entra.get()],
             Producto.cantidad: [self.var_descrip_cantidad.get()]

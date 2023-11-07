@@ -19,7 +19,6 @@
 <span class="moduletype">Script</span>  <div class="import">
 imports:
     <a href="#App">App</a>
- &#8226;   <a href="#Licencia.Licencia">Licencia.Licencia</a>
  &#8226;   <a href="#_collections_abc">_collections_abc</a>
  &#8226;   <a href="#_weakrefset">_weakrefset</a>
  &#8226;   <a href="#abc">abc</a>
@@ -182,7 +181,6 @@ imports:
  &#8226;   <a href="#sre_parse">sre_parse</a>
  &#8226;   <a href="#stat">stat</a>
  &#8226;   <a href="#tkinter">tkinter</a>
- &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
  &#8226;   <a href="#token">token</a>
  &#8226;   <a href="#tokenize">tokenize</a>
@@ -1040,10 +1038,12 @@ imported by:
 imports:
     <a href="#Admin">Admin</a>
  &#8226;   <a href="#BaseDatos.InventarioBD">BaseDatos.InventarioBD</a>
+ &#8226;   <a href="#BaseDatos.control_bd_variables">BaseDatos.control_bd_variables</a>
  &#8226;   <a href="#datetime">datetime</a>
  &#8226;   <a href="#pandas">pandas</a>
  &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+ &#8226;   <a href="#tkinter.simpledialog">tkinter.simpledialog</a>
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
  &#8226;   <a href="#tktooltip">tktooltip</a>
  &#8226;   <a href="#utilidades.EntryP">utilidades.EntryP</a>
@@ -1102,6 +1102,7 @@ imported by:
 imported by:
     <a href="#BaseDatos.InventarioBD">BaseDatos.InventarioBD</a>
  &#8226;   <a href="#BaseDatos.control_bd_logeo">BaseDatos.control_bd_logeo</a>
+ &#8226;   <a href="#BaseDatos.control_bd_variables">BaseDatos.control_bd_variables</a>
 
   </div>
 
@@ -1146,6 +1147,27 @@ imports:
 imported by:
     <a href="#Logeo.Logeo">Logeo.Logeo</a>
  &#8226;   <a href="#Registro.Registro">Registro.Registro</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="BaseDatos.control_bd_variables"></a>
+  <a target="code" href="///C:/Users/trull/OneDrive/Escritorio/Empresa/BaseDatos/control_bd_variables.py" type="text/plain"><tt>BaseDatos.control_bd_variables</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#BaseDatos">BaseDatos</a>
+ &#8226;   <a href="#sqlite3">sqlite3</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#Admin.Admin">Admin.Admin</a>
+ &#8226;   <a href="#Logeo.Logeo">Logeo.Logeo</a>
+ &#8226;   <a href="#Operario.Operario">Operario.Operario</a>
 
   </div>
 
@@ -1212,35 +1234,6 @@ imported by:
 </div>
 
 <div class="node">
-  <a name="Licencia"></a>
-  <a target="code" href="-" type="text/plain"><tt>Licencia</tt></a>
-<span class="moduletype">NamespacePackage</span>  <div class="import">
-imported by:
-    <a href="#Licencia.Licencia">Licencia.Licencia</a>
-
-  </div>
-
-</div>
-
-<div class="node">
-  <a name="Licencia.Licencia"></a>
-  <a target="code" href="///C:/Users/trull/OneDrive/Escritorio/Empresa/Licencia/Licencia.py" type="text/plain"><tt>Licencia.Licencia</tt></a>
-<span class="moduletype">SourceModule</span>  <div class="import">
-imports:
-    <a href="#Licencia">Licencia</a>
- &#8226;   <a href="#datetime">datetime</a>
- &#8226;   <a href="#json">json</a>
-
-  </div>
-  <div class="import">
-imported by:
-    <a href="#main.py">main.py</a>
-
-  </div>
-
-</div>
-
-<div class="node">
   <a name="Logeo"></a>
   <a target="code" href="-" type="text/plain"><tt>Logeo</tt></a>
 <span class="moduletype">NamespacePackage</span>  <div class="import">
@@ -1257,6 +1250,7 @@ imported by:
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
     <a href="#BaseDatos.control_bd_logeo">BaseDatos.control_bd_logeo</a>
+ &#8226;   <a href="#BaseDatos.control_bd_variables">BaseDatos.control_bd_variables</a>
  &#8226;   <a href="#Logeo">Logeo</a>
  &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
@@ -1303,6 +1297,7 @@ imported by:
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
     <a href="#BaseDatos.InventarioBD">BaseDatos.InventarioBD</a>
+ &#8226;   <a href="#BaseDatos.control_bd_variables">BaseDatos.control_bd_variables</a>
  &#8226;   <a href="#Operario">Operario</a>
  &#8226;   <a href="#datetime">datetime</a>
  &#8226;   <a href="#pandas">pandas</a>
@@ -10173,7 +10168,6 @@ imports:
 imported by:
     <a href="#Admin.Admin">Admin.Admin</a>
  &#8226;   <a href="#Inventario.Inventario">Inventario.Inventario</a>
- &#8226;   <a href="#Licencia.Licencia">Licencia.Licencia</a>
  &#8226;   <a href="#Operario.Operario">Operario.Operario</a>
  &#8226;   <a href="#_strptime">_strptime</a>
  &#8226;   <a href="#calendar">calendar</a>
@@ -17290,7 +17284,6 @@ imports:
  &#8226;   <a href="#importlib">importlib</a>
  &#8226;   <a href="#importlib._bootstrap">importlib._bootstrap</a>
  &#8226;   <a href="#importlib._bootstrap_external">importlib._bootstrap_external</a>
- &#8226;   <a href="#importlib.machinery">importlib.machinery</a>
  &#8226;   <a href="#sys">sys</a>
  &#8226;   <a href="#warnings">warnings</a>
 
@@ -17454,7 +17447,6 @@ imported by:
  &#8226;   <a href="#cffi.verifier">cffi.verifier</a>
  &#8226;   <a href="#ctypes.util">ctypes.util</a>
  &#8226;   <a href="#imp">imp</a>
- &#8226;   <a href="#importlib">importlib</a>
  &#8226;   <a href="#importlib.abc">importlib.abc</a>
  &#8226;   <a href="#inspect">inspect</a>
  &#8226;   <a href="#numpy.compat.py3k">numpy.compat.py3k</a>
@@ -18341,8 +18333,7 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#Licencia.Licencia">Licencia.Licencia</a>
- &#8226;   <a href="#charset_normalizer.models">charset_normalizer.models</a>
+    <a href="#charset_normalizer.models">charset_normalizer.models</a>
  &#8226;   <a href="#dateutil.zoneinfo">dateutil.zoneinfo</a>
  &#8226;   <a href="#google.auth._default">google.auth._default</a>
  &#8226;   <a href="#google.auth._service_account_info">google.auth._service_account_info</a>
@@ -61773,6 +61764,7 @@ imports:
 imported by:
     <a href="#BaseDatos.InventarioBD">BaseDatos.InventarioBD</a>
  &#8226;   <a href="#BaseDatos.control_bd_logeo">BaseDatos.control_bd_logeo</a>
+ &#8226;   <a href="#BaseDatos.control_bd_variables">BaseDatos.control_bd_variables</a>
  &#8226;   <a href="#pandas.io.sql">pandas.io.sql</a>
  &#8226;   <a href="#sqlite3">sqlite3</a>
  &#8226;   <a href="#sqlite3.dbapi2">sqlite3.dbapi2</a>
@@ -63003,6 +62995,7 @@ imported by:
  &#8226;   <a href="#App">App</a>
  &#8226;   <a href="#BaseDatos.InventarioBD">BaseDatos.InventarioBD</a>
  &#8226;   <a href="#BaseDatos.control_bd_logeo">BaseDatos.control_bd_logeo</a>
+ &#8226;   <a href="#BaseDatos.control_bd_variables">BaseDatos.control_bd_variables</a>
  &#8226;   <a href="#Inventario.Inventario">Inventario.Inventario</a>
  &#8226;   <a href="#Logeo.Logeo">Logeo.Logeo</a>
  &#8226;   <a href="#Operario.Operario">Operario.Operario</a>
@@ -63130,11 +63123,11 @@ imported by:
  &#8226;   <a href="#App">App</a>
  &#8226;   <a href="#BaseDatos.InventarioBD">BaseDatos.InventarioBD</a>
  &#8226;   <a href="#BaseDatos.control_bd_logeo">BaseDatos.control_bd_logeo</a>
+ &#8226;   <a href="#BaseDatos.control_bd_variables">BaseDatos.control_bd_variables</a>
  &#8226;   <a href="#Inventario.Inventario">Inventario.Inventario</a>
  &#8226;   <a href="#Logeo.Logeo">Logeo.Logeo</a>
  &#8226;   <a href="#Operario.Operario">Operario.Operario</a>
  &#8226;   <a href="#Registro.Registro">Registro.Registro</a>
- &#8226;   <a href="#main.py">main.py</a>
  &#8226;   <a href="#matplotlib.backends._backend_tk">matplotlib.backends._backend_tk</a>
  &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.simpledialog">tkinter.simpledialog</a>
@@ -63155,7 +63148,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#Logeo.Logeo">Logeo.Logeo</a>
+    <a href="#Admin.Admin">Admin.Admin</a>
+ &#8226;   <a href="#Logeo.Logeo">Logeo.Logeo</a>
  &#8226;   <a href="#Operario.Operario">Operario.Operario</a>
  &#8226;   <a href="#Registro.Registro">Registro.Registro</a>
  &#8226;   <a href="#matplotlib.backends._backend_tk">matplotlib.backends._backend_tk</a>

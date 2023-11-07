@@ -5,6 +5,7 @@ import utilidades.generc as utl
 from BaseDatos.control_bd_logeo import BD_Usuario
 from tkinter import messagebox
 from tkinter import simpledialog
+from BaseDatos.control_bd_variables import BD_Variables
 
 class WinLogeo(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -67,10 +68,10 @@ class WinLogeo(ttk.Frame):
             resp = BD_Usuario().es_admin(self.entry_user.get(), self.entry_pass.get())
             if resp[0]:
                 notebok_tabs= self.root.tabs()
-                self.root.tab(notebok_tabs[4], state="normal")
-                self.root.tab(notebok_tabs[2], state="normal")
-                self.root.tab(notebok_tabs[1], state="normal")
-                self.root.tab(notebok_tabs[0], state="hidden")
+                self.root.tab(notebok_tabs[4], state="normal") # Inventario
+                self.root.tab(notebok_tabs[2], state="normal") # Admin
+                self.root.tab(notebok_tabs[1], state="normal") # Operario
+                self.root.tab(notebok_tabs[0], state="hidden") # Logeo
                 self.root.select(notebok_tabs[2])
                 
                 dato = resp[1]
@@ -85,13 +86,17 @@ class WinLogeo(ttk.Frame):
                 self.app.win_inventario.var_delta_time.set(self.app.delta_time)
             else:
                 notebok_tabs= self.root.tabs()
-                self.root.tab(notebok_tabs[1], state="normal")
-                self.root.tab(notebok_tabs[0], state="hidden")
+                self.root.tab(notebok_tabs[1], state="normal") #Operario
+                self.root.tab(notebok_tabs[0], state="hidden") #Logeo
+                self.root.tab(notebok_tabs[4], state="normal") # Inventario
                 self.root.select(notebok_tabs[1])
-                # Se sete el nombre del operario
+                # Se setea el nombre del operario
                 dato = resp[1]
                 self.app.win_operario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
+                self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
+                
                 self.app.win_operario.var_delta_time.set(self.app.delta_time)
+                self.app.win_inventario.var_delta_time.set(self.app.delta_time)
         except:
             messagebox.showerror("SOFTTRULLO SOLUCIONES", "Usuario y/o contraseña no válidos")
         
@@ -99,7 +104,7 @@ class WinLogeo(ttk.Frame):
         
     def singup(self):
         clave= simpledialog.askstring("SOFTRULLO SOLUCIONS","      Ingrese contraseña de admin       ", parent=self)
-        if clave == "434c415645444541444d494e4953545241444f523130313040323032304033303330": # Clave en hexadecimal
+        if clave == BD_Variables.get_clave_admin(): # Clave en hexadecimal
             notebok_tabs= self.root.tabs()
             self.root.tab(notebok_tabs[3], state="normal")
             self.root.select(notebok_tabs[3])

@@ -44,8 +44,6 @@ class BD_Usuario:
         except sqlite3.IntegrityError as e:
             messagebox.showerror("SOFTRULLO SOLUCIONS","Usuario invalido o repetido")
             conn.close()
-            
-            
         
 
 class BD_Usuario_Mod:

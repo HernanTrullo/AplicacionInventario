@@ -42,7 +42,7 @@ class ListaProducto(ttk.Treeview):
         self.bind("<Double-1>", self.doble_click_mod_productos)
         
         # Tecla para elminar producto
-        self.bind("<BackSpace>", self.eliminar_producto_auto)
+        #self.bind("<BackSpace>", self.eliminar_producto_auto)
         
         # Configurar la Treeview para que utilice la Scrollbar
         self.configure(yscrollcommand=self.scrollbar.set)

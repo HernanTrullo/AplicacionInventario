@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter.ttk import *
 import pandas as pd
 from tkinter import messagebox
+from tkinter import simpledialog
 import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
@@ -48,7 +49,10 @@ class WinOperario(ttk.Frame):
         # Inicializar variables
         self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
         
+        self.bind("<FocusIn>", self.actualizar)
         
+    def actualizar(self, event):
+        self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
         self.top_frame = ttk.Frame(self, style="Cabecera.TFrame")
@@ -144,6 +148,7 @@ class WinOperario(ttk.Frame):
         self.frame_lista_producto = ttk.Frame(self)
         self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.cantidad])
         self.frame_lista_producto.grid(row=2, column=0, sticky="nsew")
+        self.win_lista_producto.bind("<BackSpace>", self.eliminar_producto_auto)
         
         ## Configurar el frame principal del operario
         self.columnconfigure(0, weight=0)
@@ -167,6 +172,8 @@ class WinOperario(ttk.Frame):
             self.entry_nombre_producto['values']=BD.retornar_nombres_productos(self.var_buscar_nombre.get())     
         except:
             self.entry_nombre_producto['values'] = [""]
+            
+            
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
@@ -177,7 +184,7 @@ class WinOperario(ttk.Frame):
         if resp:
             try:
                 BD.sacar_productos(self.win_lista_producto.retornar_productos()) # Se sacan los productos de la bases de datos
-                value_total_venta = BD_Var.get_valor_ventas_turno() + self.var_total.get() # Valor total de ventas deñ turno
+                value_total_venta = int(BD_Var.get_valor_ventas_turno()) + self.var_total.get() # Valor total de ventas deñ turno
                 
                 messagebox.showinfo("SOFTRULLO SOLUCIONS", "Operacion Exitosa!")
                 self.win_lista_producto.vaciar_productos()
@@ -186,7 +193,7 @@ class WinOperario(ttk.Frame):
                 self.saldo_cliente.formatear_valor()
                 self.actualizar_precio_total()
                 
-                BD_Var.set_valor_ventas_turno(value_total_venta)
+                BD_Var.set_valor_ventas_turno(str(value_total_venta))
                 self.actualizar_valor_vendido(value_total_venta)
                 
             except:
@@ -217,18 +224,12 @@ class WinOperario(ttk.Frame):
     
     def log_out(self):
         if messagebox.askokcancel("Log Out", "¿Estás seguro de que quieres terminar sesión?"):
-            # Resetear el valor de las ventas temporales del dia por el op
-            BD_Var.reset_valor_ventas_turno()
-            self.actualizar_valor_vendido(0)
-            
-            self.salir()
             notebok_tabs= self.root.tabs()
             self.root.tab(notebok_tabs[4], state="hidden")
             self.root.tab(notebok_tabs[2], state="hidden")
             self.root.tab(notebok_tabs[1], state="hidden")
             self.root.tab(notebok_tabs[0], state="normal")
             self.root.select(notebok_tabs[0])
-            
             
     
     def controlador_de_foco(self, event):
@@ -238,7 +239,8 @@ class WinOperario(ttk.Frame):
         self.buscar_producto()
     
     def eliminar_producto_auto(self, event):
-        self.win_lista_producto.eliminar_producto()
+        self.eliminar_producto()
+        
         
     def buscar_producto(self):
         if self.foco_frame == self.entry_codigo or self.foco_frame == self.entry_nombre_producto:

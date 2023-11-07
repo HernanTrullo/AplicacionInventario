@@ -16,8 +16,41 @@ class BD_Inventario():
     name_bd = "./BaseDatos/BaseDatos.db"
     
     @classmethod
+    def esta_el_producto_cod(cls,cod):
+        hay_producto = False
+        str = f""" SELECT * FROM Inventario
+                    WHERE {ProductoDB.codigo} = '{cod}'"""
+                    
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res)>0:
+            hay_producto = True
+        
+        return hay_producto
+    @classmethod
+    def esta_el_producto_nombre(cls,nombre):
+        hay_producto = False
+        str = f""" SELECT * FROM Inventario
+                    WHERE {ProductoDB.nombre} = '{nombre}'"""
+                    
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res)>0:
+            hay_producto = True
+        
+        return hay_producto
+    
+    @classmethod
     def obtener_productos(cls):
-        str = "SELECT * FROM Inventario"
+        str = f"SELECT * FROM Inventario ORDER BY {ProductoDB.codigo}"
                     
         conn = sqlite3.connect(cls.name_bd)
         cur = conn.cursor()

@@ -24,6 +24,7 @@ class WinInventario(ttk.Frame):
         self.var_total = tk.StringVar()
         self.var_total_vendido = tk.StringVar()
         self.var_delta_time = tk.IntVar()
+        self.var_buscar_nombre = tk.StringVar()
         
         self.create_widget()
         
@@ -84,6 +85,18 @@ class WinInventario(ttk.Frame):
         self.expandir_widget(self.frame_inventario, row=3, colum=1)
         self.frame_inventario.grid(row=1, column=1, rowspan=3, sticky="nsew")
         
+        # Frame buscar por nombre
+        self.ingreso_datos = ttk.Frame(self)
+        self.lb_nombre_producto = ttk.Label(self.ingreso_datos, text="Nombre",style="CustomSmall.TLabel")
+        self.lb_nombre_producto.grid(row=0, column=1)
+        self.entry_nombre_producto = ttk.Combobox(self.ingreso_datos, textvariable=self.var_buscar_nombre)
+        self.entry_nombre_producto.grid(row=1, column=1,sticky="nsew")
+        self.entry_nombre_producto.bind("<KeyRelease>", self.actualizar_nombre_productos)
+        self.entry_nombre_producto.bind("<Return>", self.mostrar_producto)
+        
+        self.ingreso_datos.grid(row=1, column=0, sticky="nsew")
+        self.expandir_widget(self.ingreso_datos, colum=3)
+        
         # Frame lista de productos
         self.frame_lista_producto = ttk.Frame(self)
         self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad])
@@ -97,6 +110,22 @@ class WinInventario(ttk.Frame):
         self.columnconfigure(1, weight=3)
         self.columnconfigure(0, weight=0)
         
+    
+    def mostrar_producto(self, event):
+        try:
+            prod = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
+            self.win_lista_producto.vaciar_productos()
+            self.win_lista_producto.agregar_producto(
+            self.retornar_valores_producto(prod))
+        except:
+            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Producto no encontrado")
+            
+    def actualizar_nombre_productos(self, event):
+        try:
+            self.entry_nombre_producto['values']=BD.retornar_nombres_productos(self.var_buscar_nombre.get())     
+        except:
+            self.entry_nombre_producto['values'] = [""]
+    
     
     def set_sub_total(self, event):
         valor_t = 0

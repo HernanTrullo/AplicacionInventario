@@ -60,6 +60,10 @@ class StyleAPP:
         # Estilo para el treeview
         self.style.configure("Treeview", background="white")
         
+        
+        # Estilos para los entry 
+        self.style.configure("TEntry", foreground="black")
+        
         self.style.configure("Custom.TButton", foreground="blue", font=("Helvetica", 16))
         self.style.configure("CustomOperacion.TButton", foreground="blue", font=("Helvetica", 12))
         self.style.configure("CustomQuit.TButton", foreground="red", font=("Helvetica", 16))

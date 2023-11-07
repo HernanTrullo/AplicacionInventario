@@ -19,6 +19,7 @@ class AppLIC(ttk.Frame):
         self.var_clave = StringVar()
         self.var_fecha_ini = StringVar()
         self.var_ena_clave = BooleanVar()
+        self.var_dias_pass = IntVar()
         
         self.create_widgets()
         self.pack(fill="both", expand=True)
@@ -28,6 +29,7 @@ class AppLIC(ttk.Frame):
         self.lb_clave = ttk.Label(self,text="Clave", style="CustomMedium.TLabel").grid(row=2, column=1, sticky="nsew")
         self.lb_fecha_ini = ttk.Label(self,text="Fecha Inicio", style="CustomMedium.TLabel").grid(row=3, column=1,sticky="nsew")
         self.lb_habilitar_clave = ttk.Label(self,text="Habilitar Clave", style="CustomMedium.TLabel").grid(row=4, column=1,sticky="nsew")
+        self.lb_habilitar_clave = ttk.Label(self,text="Días de Clave", style="CustomMedium.TLabel").grid(row=5, column=1,sticky="nsew")
         
         self.clave = ttk.Entry(self, textvariable=self.var_clave)
         self.clave.grid(row=2, column=2, sticky="ew")
@@ -35,13 +37,16 @@ class AppLIC(ttk.Frame):
         self.fecha_ini.grid(row=3, column=2, sticky="ew")
         self.ena_clave = ttk.Checkbutton(self,variable=self.var_ena_clave)
         self.ena_clave.grid(row=4, column=2, sticky="ew")
+        self.days_pass = ttk.Entry(self,textvariable=self.var_dias_pass)
+        self.days_pass.grid(row=5, column=2, sticky="ew")
+        
         self.btn_validar = ttk.Button(self,text="Cargar Licencia",command=self.cargar, style="Primary.TButton")
-        self.btn_validar.grid(row=5, column=2, sticky="nsew")
+        self.btn_validar.grid(row=6, column=2, sticky="nsew")
         
         for i in range(5):
             self.rowconfigure(i, weight=1)
         
-        self.rowconfigure(6, weight=3)
+        self.rowconfigure(7, weight=3)
             
         self.columnconfigure(0, weight=3)
         self.columnconfigure(1, weight=2)
@@ -63,7 +68,7 @@ class AppLIC(ttk.Frame):
             date_ini = self.var_fecha_ini.get()
             
             dt_data = dt.strptime(date_ini,"%Y-%m-%d")
-            dt_data = dt_data + datetime.timedelta(days=30)
+            dt_data = dt_data + datetime.timedelta(days=self.var_dias_pass.get())
             date_fin = dt_data.strftime("%Y-%m-%d")
             Licencia().set_lic(clave, state, date_ini, date_fin)
             messagebox.showinfo("SOFTRULLO SOLUCIONS", "Licencia actualizada existosamente")
