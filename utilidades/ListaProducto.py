@@ -41,9 +41,6 @@ class ListaProducto(ttk.Treeview):
         # Evento del doble click de cada fila
         self.bind("<Double-1>", self.doble_click_mod_productos)
         
-        # Tecla para elminar producto
-        #self.bind("<BackSpace>", self.eliminar_producto_auto)
-        
         # Configurar la Treeview para que utilice la Scrollbar
         self.configure(yscrollcommand=self.scrollbar.set)
     
@@ -139,8 +136,6 @@ class ListaProducto(ttk.Treeview):
         for i,row in self.df.iterrows():
             self.insert('', 'end', values= list(row)) 
             
-        # Se deberia actualizar el precio total ingresado
-        #self.win.actualizar_precio_total()
     
     def vaciar_productos(self):
         # Borrar todos

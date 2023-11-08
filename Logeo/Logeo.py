@@ -68,6 +68,7 @@ class WinLogeo(ttk.Frame):
             resp = BD_Usuario().es_admin(self.entry_user.get(), self.entry_pass.get())
             if resp[0]:
                 notebok_tabs= self.root.tabs()
+                self.root.tab(notebok_tabs[5], state="normal") # Afiliados
                 self.root.tab(notebok_tabs[4], state="normal") # Inventario
                 self.root.tab(notebok_tabs[2], state="normal") # Admin
                 self.root.tab(notebok_tabs[1], state="normal") # Operario
@@ -79,24 +80,30 @@ class WinLogeo(ttk.Frame):
                 self.app.win_operario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 self.app.win_admin.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
+                self.app.win_socios.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 
                 # Se setean los dias faltantes
                 self.app.win_operario.var_delta_time.set(self.app.delta_time)
                 self.app.win_admin.var_delta_time.set(self.app.delta_time)
                 self.app.win_inventario.var_delta_time.set(self.app.delta_time)
+                self.app.win_socios.var_delta_time.set(self.app.delta_time)
             else:
                 notebok_tabs= self.root.tabs()
+                self.root.tab(notebok_tabs[5], state="normal") # Afiliados
+                self.root.tab(notebok_tabs[4], state="normal") # Inventario
                 self.root.tab(notebok_tabs[1], state="normal") #Operario
                 self.root.tab(notebok_tabs[0], state="hidden") #Logeo
-                self.root.tab(notebok_tabs[4], state="normal") # Inventario
+                
                 self.root.select(notebok_tabs[1])
                 # Se setea el nombre del operario
                 dato = resp[1]
                 self.app.win_operario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
+                self.app.win_socios.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 
                 self.app.win_operario.var_delta_time.set(self.app.delta_time)
                 self.app.win_inventario.var_delta_time.set(self.app.delta_time)
+                self.app.win_socios.var_delta_time.set(self.app.delta_time)
         except:
             messagebox.showerror("SOFTTRULLO SOLUCIONES", "Usuario y/o contraseña no válidos")
         
