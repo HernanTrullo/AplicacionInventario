@@ -28,7 +28,23 @@ class BD_Socios:
         except:
             messagebox.showwarning("SOFTRU SOLUCIONS", "Algo ha ocurrido con la base de datos")
             conn.close()
-        
+    
+    @classmethod
+    def guardar_info_usuarios(cls, df:pd.DataFrame):
+        for index,row in df.iterrows():
+            try:
+                socio = cls.buscar_socio_cedula(row[UsuarioDB.cedula])
+                cls.actualizar_socio(row)
+            except ExcepBus as e:
+                socio ={
+                    UsuarioDB.cedula: row[UsuarioDB.cedula],
+                    UsuarioDB.nombre: row[UsuarioDB.nombre],
+                    UsuarioDB.total_cartera: row[UsuarioDB.total_cartera],
+                    UsuarioDB.total_comprado: row[UsuarioDB.total_comprado]
+                    
+                }
+                cls.agregar_socio(socio)
+    
     @classmethod
     def eliminar_socio(cls,cedula):
         str = f""" DELETE FROM Socios WHERE Cedula='{cedula}';"""
@@ -39,28 +55,18 @@ class BD_Socios:
         conn.close()
         
     @classmethod
-    def actualizar_nombre_socio(cls,user):
+    def actualizar_socio(cls,user):
         str = f""" UPDATE Socios
-                    SET {UsuarioDB.nombre} = {user[UsuarioDB.nombre]}
+                    SET {UsuarioDB.cedula} = '{user[UsuarioDB.cedula]}', {UsuarioDB.nombre} = '{user[UsuarioDB.nombre]}',{UsuarioDB.total_cartera} = {user[UsuarioDB.total_cartera]}, {UsuarioDB.total_comprado}={user[UsuarioDB.total_comprado]}
                     WHERE {UsuarioDB.cedula} = '{user[UsuarioDB.cedula]}'"""
+        
+        
         conn = sqlite3.connect(cls.name_bd)           
         cur = conn.cursor()
         cur.execute(str)
         conn.commit()
         conn.close()
-        
-        
-    @classmethod
-    def agregar_saldo_user(cls,user):
-        str = f""" UPDATE Socios
-                    SET {UsuarioDB.total_cartera} = {user[UsuarioDB.total_cartera]}, {UsuarioDB.total_comprado} = {user[UsuarioDB.total_comprado]}
-                    WHERE {UsuarioDB.cedula} = '{user[UsuarioDB.cedula]}'"""
-        conn = sqlite3.connect(cls.name_bd)           
-        cur = conn.cursor()
-        cur.execute(str)
-        conn.commit()
-        conn.close()
-        
+    
     @classmethod
     def obtener_usuarios(cls):
         str = f"SELECT * FROM Socios ORDER BY {UsuarioDB.total_cartera}"
@@ -95,7 +101,7 @@ class BD_Socios:
     @classmethod
     def retornar_nombres_socios(cls, clave):
         str = f""" SELECT {UsuarioDB.nombre} FROM Socios
-                            WHERE {UsuarioDB.nombre} like '{clave}%'"""        
+                            WHERE {UsuarioDB.nombre} like '%{clave}%'"""        
         conn = sqlite3.connect(cls.name_bd)
         cur = conn.cursor()
         res = cur.execute(str)

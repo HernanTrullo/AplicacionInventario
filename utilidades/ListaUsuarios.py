@@ -44,10 +44,12 @@ class Listausuario(ttk.Treeview):
             SOCIO.total_cartera:    [user[SOCIO.total_cartera]],
             SOCIO.total_comprado:   [user[SOCIO.total_comprado]]
         }
-        
-        self.df = pd.concat([self.df, pd.DataFrame(data)])
-        self.actualizar()
-    
+        res = self.df.loc[self.df[SOCIO.cedula] == data[SOCIO.cedula][0]]
+        if (res.empty):
+            self.df = pd.concat([self.df, pd.DataFrame(data)])
+        self.actualizar()    
+            
+            
     def modificar_saldo_usuario(self, user):
         data = {
             SOCIO.cedula:           user[SOCIO.cedula],
@@ -59,8 +61,22 @@ class Listausuario(ttk.Treeview):
         self.df.loc[self.df[SOCIO.cedula] == data[SOCIO.total_cartera][0], SOCIO.total_cartera] = data[SOCIO.total_cartera]
         self.df.loc[self.df[SOCIO.cedula] == data[SOCIO.total_comprado][0], SOCIO.total_comprado] = data[SOCIO.total_comprado]
         self.actualizar()
+    
+    def abonar_cartera(self, abono):
+        selection = self.selection()
+        if (len(selection) == 1):
+            values = self.item(selection, "values")
+            total_cartera =  self.df.loc[self.df[SOCIO.cedula] == values[0], SOCIO.total_cartera].values[0] - abono
+            if (total_cartera >0):
+                self.df.loc[self.df[SOCIO.cedula] == values[0], SOCIO.total_cartera] = total_cartera
+            else:
+                messagebox.showwarning("SOFTRULLO SOLUCIONS","Va a abonar mas de lo que debe!")
+            
+        else:
+            messagebox.showwarning("SOFTRULLO SOLUCIONS","Debe seleccionar solamente uno de los usuarios")
+        self.actualizar()
         
-    def eliminar_usuario(self, cedula):
+    def eliminar_usuario(self):
         selected_item = self.selection()
         if selected_item:
             res = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Está seguro que desea eliminar el usuario")

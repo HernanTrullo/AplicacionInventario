@@ -91,22 +91,21 @@ class WinSocios(ttk.Frame):
         self.expandir_widget(self.ingreso_datos, colum=3)
         self.ingreso_datos.grid(row=1, column=0,sticky="nsew",pady=20)
         
-        # Frame descripción del producto (Compra)
-        self.frame_descrip_producto = ttk.Frame(self)
+        # Frame descripción del usuario
+        self.frame_descrip_socio = ttk.Frame(self)
         
-        self.lb_cod_descrp_user = ttk.Label(self.frame_descrip_producto, text="Cédula", style="CustomSmall.TLabel")
+        self.lb_cod_descrp_user = ttk.Label(self.frame_descrip_socio, text="Cédula", style="CustomSmall.TLabel")
         self.lb_cod_descrp_user.grid(row=0, column=0,sticky="nsew")
-        self.entry_cod_descrp_user = ttk.Entry(self.frame_descrip_producto, textvariable=self.var_descrip_cod)
+        self.entry_cod_descrp_user = ttk.Entry(self.frame_descrip_socio, textvariable=self.var_descrip_cod)
         self.entry_cod_descrp_user.grid(row=1, column=0,sticky="nsew")
         
-        self.lb_nombre_descrp_user = ttk.Label(self.frame_descrip_producto, text="Nombre",style="CustomSmall.TLabel")
+        self.lb_nombre_descrp_user = ttk.Label(self.frame_descrip_socio, text="Nombre",style="CustomSmall.TLabel")
         self.lb_nombre_descrp_user.grid(row=0, column=1,sticky="nsew")
-        self.entry_nombre_descrp_user = ttk.Entry(self.frame_descrip_producto, textvariable=self.var_descrip_nombre)
+        self.entry_nombre_descrp_user = ttk.Entry(self.frame_descrip_socio, textvariable=self.var_descrip_nombre)
         self.entry_nombre_descrp_user.grid(row=1, column=1,sticky="nsew") # Entry
         
-        #self.cambiar_widget()
-        self.frame_descrip_producto.grid(row=2, column=0,sticky="nsew")
-        self.expandir_widget(self.frame_descrip_producto, colum=4)
+        #self.cambiar_widget() row=2, column=0,sticky="nsew"
+        self.expandir_widget(self.frame_descrip_socio, colum=4)
         
         
         # Frame Botones
@@ -115,14 +114,13 @@ class WinSocios(ttk.Frame):
         self.img_add = utl.leer_imagen("./Imagenes/BTN_Agregar.png", (24,24))
         self.img_per = utl.leer_imagen("./Imagenes/BTN_Agregar.png", (24,24))
         
-        self.btn_agregar = ttk.Button(self.frame_botones, image=self.img_add, style="Primary.TButton",command=self.agregar_socio)
-        self.btn_agregar.grid(row=0, column=3, pady=10)  
+        
         self.btn_modificar = ttk.Button(self.frame_botones, image=self.img_mod,style="Primary.TButton" ,command=self.modificar_socio)
         self.btn_modificar.grid(row=0, column=2)
         
         # Se configuran los tooltip
-        ToolTip(self.btn_agregar, "Agregar Producto", delay=0.5)
-        ToolTip(self.btn_modificar, "Modificar Producto", delay=0.5)
+        
+        ToolTip(self.btn_modificar, "Modificar Usuario", delay=0.5)
         
         self.frame_botones.columnconfigure(0, weight= 7)
         self.frame_botones.columnconfigure(4, weight= 1)
@@ -130,25 +128,26 @@ class WinSocios(ttk.Frame):
         
         
         # Frame lista de productos
-        self.frame_lista_producto = ttk.Frame(self)
-        self.win_lista_producto = Listausuario(self.frame_lista_producto, self,[SOCIO.cedula, SOCIO.nombre, SOCIO.total_cartera, SOCIO.total_comprado])
-        self.frame_lista_producto.grid(row=4, column=0, sticky="nsew")
+        self.frame_lista_socio = ttk.Frame(self)
+        self.win_lista_socio = Listausuario(self.frame_lista_socio, self,[SOCIO.cedula, SOCIO.nombre, SOCIO.total_cartera, SOCIO.total_comprado])
+        self.frame_lista_socio.grid(row=4, column=0, sticky="nsew")
         
         
         # Bóton para cargar los datos al inventario, salir y log out y cambio de clave
         self.frame_inventario = ttk.Frame(self)
         
-        self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Cargar Datos Usuario", command=self.cargar_usuario_mod,style="Primary.TButton")
-        self.btn_cargar_inventario.grid(row=0,column=0, sticky="nsew")
-        
-        self.btn_salir  = ttk.Button(self.frame_inventario, text="Salir",command=self.salir, style="Primary.TButton")
-        self.btn_salir.grid(row=1, column=0,sticky="nsew")
+        self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Guardar Datos Usuarios", command=self.guardar_datos,style="Primary.TButton")
+        self.btn_cargar_inventario.grid(row=0,column=0, sticky="nsew", columnspan=2)
+        self.btn_cambiar_clave  = ttk.Button(self.frame_inventario, text="Abonar",command=self.abonar, style="Primary.TButton")
+        self.btn_cambiar_clave.grid(row=1, column=0,sticky="nsew",columnspan=2)
+        self.btn_mostrar_todos  = ttk.Button(self.frame_inventario, text="Obtener Usuarios",command=self.mostrar_users, style="Primary.TButton")
+        self.btn_mostrar_todos.grid(row=2, column=0,sticky="nsew",columnspan=2)
         
         self.btn_log_out  = ttk.Button(self.frame_inventario, text="Cerrar Sesión",command=self.log_out, style="Primary.TButton")
         self.btn_log_out.grid(row=3, column=0,sticky="nsew")
         
-        self.btn_cambiar_clave  = ttk.Button(self.frame_inventario, text="Abonar",command=self.abonar, style="Primary.TButton")
-        self.btn_cambiar_clave.grid(row=2, column=0,sticky="nsew")
+        self.btn_salir  = ttk.Button(self.frame_inventario, text="Salir",command=self.salir, style="Primary.TButton")
+        self.btn_salir.grid(row=3, column=1,sticky="nsew")
         
         self.expandir_widget(self.frame_inventario, row=4, colum=1)
         self.frame_inventario.grid(row=0, column=1, rowspan=5, sticky="nsew")
@@ -158,37 +157,45 @@ class WinSocios(ttk.Frame):
         self.columnconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
         
+    def mostrar_users(self):
+        usuarios = BD.obtener_usuarios()
+        self.win_lista_socio.vaciar_productos()
+        for user in usuarios:
+            self.win_lista_socio.agregar_usuario(self.return_socio_dict(user))
+        
     
     def abonar(self):
-        pass
+        abono = simpledialog.askinteger("SOFTRULLO SOLUCIONS","Ingrese un valor para abonar", initialvalue=0)
+        if(abono>0):
+            self.win_lista_socio.abonar_cartera(abono)
+        else:
+            messagebox.showwarning("SOFTRULLO SOLUCIONS","El valor debe ser positivo")
     
     def log_out(self):
-        pass
+        for tab in self.root.tabs():
+            self.root.tab(tab, state="hidden")
+        self.root.tab(self.root.tabs()[0], state="normal")
+        self.root.select(self.root.tabs()[0])
     
-    def cargar_usuario_mod(self):
+    def guardar_datos(self):
+        resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Esta seguro que va a guardar los datos?")
+        if (resp):
+            try:
+                BD.guardar_info_usuarios(self.win_lista_socio.retornar_productos())
+                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Datos guardados correctamente!")
+                self.win_lista_socio.vaciar_productos()
+            except:
+                messagebox.showerror("SOFTRULLO SOLUCIONS", "Ha ocurrido un error con la base de datos comuniquese con el técnico de soporte")
         
-        pass
-    
     def salir(self):
-        pass
+        self.app.on_close()
     
-    def agregar_socio(self):
-        user = {
-            SOCIO.cedula: self.var_descrip_cod.get(),
-            SOCIO.nombre: self.var_descrip_nombre.get(),
-            SOCIO.total_comprado: 0,
-            SOCIO.total_cartera: 0
-        }
-        messaje = f"Está seguro que desea agregar el usuario {user[SOCIO.nombre]}?"
-        resp = messagebox.askokcancel("SOFTRU SOLUCIONS", messaje)
-        if resp:
-            BD.agregar_socio(user)
-            messaje = "¡Socio agregado correctamente!"
-            messagebox.showinfo("SOFTRU SOLUCIONS", messaje)
+    def agregar_socio(self, bandera_cod, dato):
+        self.win_lista_socio.agregar_usuario(self.return_socio_dict(self.pedir_datos(bandera_cod, dato)))
+        self.limpiar_variables_busqueda()
     
     def modificar_socio(self):
         pass
-    
     
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
@@ -214,27 +221,23 @@ class WinSocios(ttk.Frame):
         if self.foco_frame == self.entry_codigo or self.foco_frame == self.entry_nombre:
             try:
                 if self.foco_frame == self.entry_codigo:
-                    values = BD.buscar_socio_cedula(self.var_buscar_cod.get())   
-                    self.var_descrip_cod.set(values[0])
+                    values = BD.buscar_socio_cedula(self.var_buscar_cod.get())
+                    self.win_lista_socio.vaciar_productos()
+                    self.win_lista_socio.agregar_usuario(self.return_socio_dict(values))
                     
                 elif self.foco_frame == self.entry_nombre:
                     values = BD.buscar_socio_nombre(self.var_buscar_nombre.get())
-                    self.var_descrip_cod.set(values[0])
-                        
+                    self.win_lista_socio.vaciar_productos()
+                    self.win_lista_socio.agregar_usuario(self.return_socio_dict(values))
             except  ExcepBus as e:  
                 respuesta=messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Cédula o nombre no encontrado. ¿Desea agregar un nuevo usuario?")
                 if respuesta:
                     if self.foco_frame == self.entry_codigo:
-                        self.cambiar_widget(2)
-                        self.limpiar_variables()
-                        self.var_descrip_cod.set(self.var_buscar_cod.get())
+                        self.agregar_socio(True,self.var_buscar_cod.get())
                     elif self.foco_frame == self.entry_nombre:
-                        self.cambiar_widget(1)
-                        self.limpiar_variables()
-                        self.var_descrip_nombre.set(self.var_buscar_nombre.get())
-                        
-            self.var_buscar_cod.set("")
-            self.var_buscar_nombre.set("")
+                        self.agregar_socio(False,self.var_buscar_nombre.get())
+                    
+            self.limpiar_variables_busqueda()
     
     def cambiar_widget(self, comand=0):
         if comand==0:
@@ -244,8 +247,34 @@ class WinSocios(ttk.Frame):
             # Se activan todos menos la cedula
             pass
     
-    def limpiar_variables(self):
-        pass
+    def limpiar_variables_busqueda(self):
+        self.var_buscar_cod.set("")
+        self.var_buscar_nombre.set("")
+        self.asignar_foco(self.foco_frame)
     
-    
+    def return_socio_dict(self, user_list):
+        return  {
+            SOCIO.cedula: user_list[0],
+            SOCIO.nombre: user_list[1],
+            SOCIO.total_comprado: user_list[3],
+            SOCIO.total_cartera: user_list[2]
+        }
         
+    def asignar_foco(self, widget):
+        widget.focus()
+        
+    def mostrar_widget(self, row, column, sticky, widget):
+        widget.grid(row=row, column=column, sticky=sticky)
+    
+    def ocultar_widget(self, widget):
+        widget.grid_remove()
+        
+    def pedir_datos(self, bandera_cod, dato):
+        if (bandera_cod):
+            cedula = dato
+            nombre = simpledialog.askstring("SOFTRU SOLUCIONS", "Ingrese la nombre:", parent=self)    
+        else:
+            cedula = simpledialog.askstring("SOFTRU SOLUCIONS", "Ingrese la cedula:", parent=self)
+            nombre = dato
+        
+        return (nombre, cedula, 0, 0)
