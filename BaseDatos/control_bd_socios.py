@@ -66,6 +66,8 @@ class BD_Socios:
         cur.execute(str)
         conn.commit()
         conn.close()
+        
+    
     
     @classmethod
     def obtener_usuarios(cls):
@@ -127,3 +129,17 @@ class BD_Socios:
             return res[0]
         else:
             raise ExcepBus("Socio no encontrado")
+        
+    @classmethod
+    def buscar_socios_nombre(cls, clave):
+        str = f""" SELECT {UsuarioDB.cedula} FROM Socios
+                            WHERE {UsuarioDB.cedula} like '{clave}%'"""        
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        if len(res) >0:
+            return [cedulas[0] for cedulas in res]
+        else:
+            raise ExcepBus("Nombre no encontrado")

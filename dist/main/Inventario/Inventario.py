@@ -25,6 +25,9 @@ class WinInventario(ttk.Frame):
         self.var_total_vendido = tk.StringVar()
         self.var_delta_time = tk.IntVar()
         self.var_buscar_nombre = tk.StringVar()
+        self.var_buscar_cod = tk.StringVar()
+        
+        self.foco_frame = None
         
         self.create_widget()
         
@@ -87,12 +90,18 @@ class WinInventario(ttk.Frame):
         
         # Frame buscar por nombre
         self.ingreso_datos = ttk.Frame(self)
+        
         self.lb_nombre_producto = ttk.Label(self.ingreso_datos, text="Nombre",style="CustomSmall.TLabel")
         self.lb_nombre_producto.grid(row=0, column=1)
         self.entry_nombre_producto = ttk.Combobox(self.ingreso_datos, textvariable=self.var_buscar_nombre)
         self.entry_nombre_producto.grid(row=1, column=1,sticky="nsew")
         self.entry_nombre_producto.bind("<KeyRelease>", self.actualizar_nombre_productos)
         self.entry_nombre_producto.bind("<Return>", self.mostrar_producto)
+        
+        self.lb_codigo = ttk.Label(self.ingreso_datos, text="Código", style="CustomSmall.TLabel")
+        self.lb_codigo.grid(row=0, column=0)
+        self.entry_codigo = ttk.Entry(self.ingreso_datos, textvariable=self.var_buscar_cod,style="Custom.TEntry")
+        self.entry_codigo.grid(row=1, column=0,sticky="nsew")
         
         self.ingreso_datos.grid(row=1, column=0, sticky="nsew")
         self.expandir_widget(self.ingreso_datos, colum=3)
@@ -110,15 +119,45 @@ class WinInventario(ttk.Frame):
         self.columnconfigure(1, weight=3)
         self.columnconfigure(0, weight=0)
         
+        
+        # guardar foco del frame
+        self.entry_codigo.bind("<FocusIn>", self.controlador_de_foco)
+        self.entry_nombre_producto.bind("<FocusIn>", self.controlador_de_foco)
+        
+        # Agregar producto automaticamente 
+        self.entry_codigo.bind("<Return>", self.mostrar_producto)
+        
+    def controlador_de_foco(self, event):
+        self.foco_frame = event.widget
+    
     
     def mostrar_producto(self, event):
         try:
-            prod = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
-            self.win_lista_producto.vaciar_productos()
-            self.win_lista_producto.agregar_producto(
-            self.retornar_valores_producto(prod))
+            if self.foco_frame == self.entry_nombre_producto:
+                prod = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
+                self.win_lista_producto.vaciar_productos()
+                self.win_lista_producto.agregar_producto(
+                self.retornar_valores_producto(prod))
+                
+                
+            elif self.foco_frame == self.entry_codigo:
+                prod = BD.buscar_producto_cod(self.var_buscar_cod.get())
+                self.win_lista_producto.vaciar_productos()
+                self.win_lista_producto.agregar_producto(
+                self.retornar_valores_producto(prod))
+            
+            
+                
         except:
             messagebox.showinfo("SOFTRULLO SOLUCIONS", "Producto no encontrado")
+        
+        self.vaciar_widget()
+    
+    
+    
+    def vaciar_widget(self):
+        self.var_buscar_nombre.set("")
+        self.var_buscar_cod.set("")
             
     def actualizar_nombre_productos(self, event):
         try:
@@ -159,7 +198,7 @@ class WinInventario(ttk.Frame):
         for producto in productos:
             self.win_lista_producto.agregar_producto(self.retornar_valores_producto(producto))
 
-        self.set_valor_total(self.win_lista_producto.calcular_precio_productos())
+        self.set_valor_total(self.win_lista_producto.calcular_precio_productos_entrada())
         self.set_valor_total_vendido(self.win_lista_producto.calcular_precio_productos_vendido())
         
     def set_valor_total(self, valor):

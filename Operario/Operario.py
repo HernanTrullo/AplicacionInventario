@@ -13,7 +13,10 @@ from tkinter import simpledialog
 import utilidades.generc as utl
 import datetime
 from BaseDatos.control_bd_variables import BD_Variables as BD_Var
-    
+from BaseDatos.control_bd_socios import BD_Socios as SOCIO
+from BaseDatos.control_bd_socios import UsuarioDB as SOCIO_US
+import numpy as np
+
 class WinOperario(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
         super().__init__(root)
@@ -26,7 +29,7 @@ class WinOperario(ttk.Frame):
         
         self.var_descrip_nombre = tk.StringVar()
         self.var_descrip_cod = tk.StringVar()
-        self.var_descrip_precio = tk.IntVar()
+        self.var_descrip_precio = tk.DoubleVar()
         self.var_descrip_cantidad = tk.IntVar()
         
         self.var_buscar_nombre = tk.StringVar()
@@ -39,7 +42,10 @@ class WinOperario(ttk.Frame):
         self.var_saldo_cliente = IntVar()
         
         self.var_delta_time = tk.IntVar()
+        self.var_cedula_check = tk.StringVar()
         
+        self.var_es_cartera = tk.BooleanVar()
+        self.value_ocultar = True
         
         self.foco_frame = None
         
@@ -66,6 +72,7 @@ class WinOperario(ttk.Frame):
         self.lb_valor_vendido_op.grid(row=0, column=2, padx=10)
         self.valor_vendido_op = LabelP(self.top_frame, textvariable=self.var_valor_ventido_op, style="CCustomMedium.TLabel")
         self.valor_vendido_op.grid(row=0, column=3, padx=10)
+        self.lb_valor_vendido_op.bind("<Button-1>", lambda event: self.toggle_visibility())
             
         self.lb_fecha = ttk.Label(self.top_frame, text="Fecha: ", style="CCustomLarge.TLabel")
         self.lb_fecha.grid(row=1,column=0)
@@ -127,21 +134,31 @@ class WinOperario(ttk.Frame):
         self.aporte_cliente.bind("<KeyRelease>", self.calcular_precio)
         
         
-        self.lb_saldo_cliente = ttk.Label(self.frame_calculo_cuenta, text="Saldo Cliente", style="CCustomMedium.TLabel")
-        self.lb_saldo_cliente.grid(row=1, column=0)
+        self.lb_saldo_cliente = ttk.Label(self.frame_calculo_cuenta, text="Saldo Cliente", style="CCustomMedium.TLabel").grid(row=1, column=0)
         self.saldo_cliente = LabelP(self.frame_calculo_cuenta, textvariable=self.var_saldo_cliente, style="CCustomMedium.TLabel")
         self.saldo_cliente.grid(row = 1, column=1)
         
+        self.lb_cedula_check = ttk.Label(self.frame_calculo_cuenta, text="Cédula Cliente", style="CCustomMedium.TLabel").grid(row=2, column=0)
+        self.cedula_check = ttk.Combobox(self.frame_calculo_cuenta, textvariable=self.var_cedula_check)
+        self.cedula_check.grid(row=2, column=1)
+        self.cedula_check.bind("<KeyRelease>", self.buscar_cedula)
+        self.cedula_check["values"] = ["0"]
+        self.cedula_check.set(0)
+        
+        self.lb_es_cartera_cliente = ttk.Label(self.frame_calculo_cuenta, text="Cartera", style="CCustomMedium.TLabel").grid(row=3, column=0)
+        self.es_cartera = ttk.Checkbutton(self.frame_calculo_cuenta, variable=self.var_es_cartera)
+        self.es_cartera.grid(row=3, column=1)
+        
         self.btn_vender  = ttk.Button(self.frame_calculo_cuenta, text="Vender",command=self.vender, style="Primary.TButton")
-        self.btn_vender.grid(row=2, column=0, columnspan=2, sticky="nsew")
+        self.btn_vender.grid(row=4, column=0, columnspan=2, sticky="nsew")
         
         self.btn_salir  = ttk.Button(self.frame_calculo_cuenta, text="Salir",command=self.salir, style="Primary.TButton")
-        self.btn_salir.grid(row=4, column=0, columnspan=2,sticky="nsew")
+        self.btn_salir.grid(row=5, column=0, columnspan=2,sticky="nsew")
         
         self.btn_log_out  = ttk.Button(self.frame_calculo_cuenta, text="Salir Cuenta",command=self.log_out, style="Primary.TButton")
-        self.btn_log_out.grid(row=3, column=0, columnspan=2,sticky="nsew")
+        self.btn_log_out.grid(row=6, column=0, columnspan=2,sticky="nsew")
         
-        self.expandir_widget(self.frame_calculo_cuenta, row=5, colum=2)
+        self.expandir_widget(self.frame_calculo_cuenta, row=7, colum=2)
         self.frame_calculo_cuenta.grid(row=2, column=1,sticky="nsew")
         
         # Frame lista de productos
@@ -167,6 +184,24 @@ class WinOperario(ttk.Frame):
         self.var_fecha.set(datetime.date.today().strftime('%d/%m/%Y'))
         self.actualizar_hora()
     
+    def toggle_visibility(self):
+        if self.value_ocultar:
+            self.valor_vendido_op.grid_forget()
+            self.value_ocultar = False
+        else:
+            self.valor_vendido_op.grid(row=0, column=3, padx=10)
+            self.value_ocultar = True
+    
+    def buscar_cedula(self, event):
+        try:
+            values = SOCIO.buscar_socios_nombre(self.var_cedula_check.get())
+            if values:
+                self.cedula_check["values"] =  values
+            else:
+                self.cedula_check["values"] = ["0"]
+        except:
+            self.cedula_check["values"] = ["0"]
+    
     def actualizar_nombre_productos(self, event):
         try:
             self.entry_nombre_producto['values']=BD.retornar_nombres_productos(self.var_buscar_nombre.get())     
@@ -180,26 +215,46 @@ class WinOperario(ttk.Frame):
         self.after(1000, self.actualizar_hora)
         
     def vender(self):
-        resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Esta seguro que desea vender los anteriores productos?")
-        if resp:
-            try:
-                BD.sacar_productos(self.win_lista_producto.retornar_productos()) # Se sacan los productos de la bases de datos
-                value_total_venta = int(BD_Var.get_valor_ventas_turno()) + self.var_total.get() # Valor total de ventas deñ turno
-                
-                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Operacion Exitosa!")
-                self.win_lista_producto.vaciar_productos()
-                self.var_saldo_cliente.set(0)
-                self.var_aporte_cliente.set(0)
-                self.saldo_cliente.formatear_valor()
-                self.actualizar_precio_total()
-                
-                BD_Var.set_valor_ventas_turno(str(value_total_venta))
-                self.actualizar_valor_vendido(value_total_venta)
-                
-            except:
-                messagebox.showerror("SOFTRULLO SOLUCIONS", """Algo inesperado a ocurrido con la base de datos
-                                    por favor comunicarse con el soporte técnico""")
-                                    
+        try:
+            values_socio = list(SOCIO.buscar_socio_cedula(self.var_cedula_check.get()))
+            resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Esta seguro que desea vender los anteriores productos?")
+            if resp:
+                try:
+                    BD.sacar_productos(self.win_lista_producto.retornar_productos()) # Se sacan los productos de la bases de datos
+                    value_total_venta = int(BD_Var.get_valor_ventas_turno()) + self.var_total.get() # Valor total de ventas del turno
+                    #Se actualizan las variables de afiliado
+                    values_socio[3] = self.var_total.get() + values_socio[3]
+                    valor_cartera = values_socio[2]
+                    if (self.var_es_cartera.get()):
+                        values_socio[2] = valor_cartera + self.var_total.get() # valor cartera
+                    dict_u= {
+                        SOCIO_US.cedula: values_socio[0],
+                        SOCIO_US.nombre: values_socio[1],
+                        SOCIO_US.total_cartera: values_socio[2],
+                        SOCIO_US.total_comprado: values_socio[3]
+                    }
+                    SOCIO.actualizar_socio(dict_u)
+                    
+                    
+                    self.win_lista_producto.vaciar_productos()
+                    self.var_es_cartera.set(False)
+                    self.var_cedula_check.set(0)
+                    self.var_saldo_cliente.set(0)
+                    self.var_aporte_cliente.set(0)
+                    self.saldo_cliente.formatear_valor()
+                    self.actualizar_precio_total()
+                    
+                    BD_Var.set_valor_ventas_turno(str(value_total_venta))
+                    self.actualizar_valor_vendido(value_total_venta)
+                    
+                    
+                    messagebox.showinfo("SOFTRULLO SOLUCIONS", "Operacion Exitosa!")
+                    
+                except:
+                    messagebox.showerror("SOFTRULLO SOLUCIONS", """Algo inesperado a ocurrido con la base de datos
+                                        por favor comunicarse con el soporte técnico""")
+        except:
+            messagebox.showerror("SOFTRULLO SOLUCIONS", "Cedula no encontrada, ,verifique la cedula por defecto")
                                 
     
     
@@ -271,7 +326,6 @@ class WinOperario(ttk.Frame):
                         
             self.var_buscar_cod.set("")
             self.var_buscar_nombre.set("")
-    
     
     
     # Funciones de la visualización de los productos temporal

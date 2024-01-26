@@ -111,8 +111,6 @@ class WinSocios(ttk.Frame):
         # Frame Botones
         self.frame_botones = ttk.Frame(self)
         self.img_mod = utl.leer_imagen("./Imagenes/BTN_Modificar.png", (24,24))
-        self.img_add = utl.leer_imagen("./Imagenes/BTN_Agregar.png", (24,24))
-        self.img_per = utl.leer_imagen("./Imagenes/BTN_Agregar.png", (24,24))
         
         
         self.btn_modificar = ttk.Button(self.frame_botones, image=self.img_mod,style="Primary.TButton" ,command=self.modificar_socio)
@@ -130,7 +128,9 @@ class WinSocios(ttk.Frame):
         # Frame lista de productos
         self.frame_lista_socio = ttk.Frame(self)
         self.win_lista_socio = Listausuario(self.frame_lista_socio, self,[SOCIO.cedula, SOCIO.nombre, SOCIO.total_cartera, SOCIO.total_comprado])
+        self.win_lista_socio.bind("<BackSpace>", self.eliminar_producto_lista)
         self.frame_lista_socio.grid(row=4, column=0, sticky="nsew")
+        
         
         
         # Bóton para cargar los datos al inventario, salir y log out y cambio de clave
@@ -138,11 +138,14 @@ class WinSocios(ttk.Frame):
         
         self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Guardar Datos Usuarios", command=self.guardar_datos,style="Primary.TButton")
         self.btn_cargar_inventario.grid(row=0,column=0, sticky="nsew", columnspan=2)
-        self.btn_cambiar_clave  = ttk.Button(self.frame_inventario, text="Abonar",command=self.abonar, style="Primary.TButton")
-        self.btn_cambiar_clave.grid(row=1, column=0,sticky="nsew",columnspan=2)
+        
+        self.btn_abonar  = ttk.Button(self.frame_inventario, text="Abonar",command=self.abonar, style="Primary.TButton")
+        self.btn_abonar.grid(row=1, column=0,sticky="nsew")
+        self.btn_quitar_abono = ttk.Button(self.frame_inventario, text="Quitar Abono",command=self.quitar_abono, style="Primary.TButton")
+        self.btn_quitar_abono.grid(row=1, column=1,sticky="nsew")
+        
         self.btn_mostrar_todos  = ttk.Button(self.frame_inventario, text="Obtener Usuarios",command=self.mostrar_users, style="Primary.TButton")
         self.btn_mostrar_todos.grid(row=2, column=0,sticky="nsew",columnspan=2)
-        
         self.btn_log_out  = ttk.Button(self.frame_inventario, text="Cerrar Sesión",command=self.log_out, style="Primary.TButton")
         self.btn_log_out.grid(row=3, column=0,sticky="nsew")
         
@@ -156,13 +159,22 @@ class WinSocios(ttk.Frame):
         self.rowconfigure(4, weight=3)
         self.columnconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
-        
+    
+    def eliminar_producto_lista(self, event):
+        self.win_lista_socio.eliminar_usuario()
+    
     def mostrar_users(self):
         usuarios = BD.obtener_usuarios()
         self.win_lista_socio.vaciar_productos()
         for user in usuarios:
             self.win_lista_socio.agregar_usuario(self.return_socio_dict(user))
         
+    def quitar_abono(self):
+        abono = simpledialog.askinteger("SOFTRULLO SOLUCIONS","Ingrese un valor para quitar abono", initialvalue=0)
+        if(abono>0):
+            self.win_lista_socio.abonar_cartera(-abono)
+        else:
+            messagebox.showwarning("SOFTRULLO SOLUCIONS","El valor debe ser positivo")   
     
     def abonar(self):
         abono = simpledialog.askinteger("SOFTRULLO SOLUCIONS","Ingrese un valor para abonar", initialvalue=0)
@@ -277,4 +289,4 @@ class WinSocios(ttk.Frame):
             cedula = simpledialog.askstring("SOFTRU SOLUCIONS", "Ingrese la cedula:", parent=self)
             nombre = dato
         
-        return (nombre, cedula, 0, 0)
+        return (cedula, nombre, 0, 0)

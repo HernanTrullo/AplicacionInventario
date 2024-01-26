@@ -13,6 +13,7 @@ import datetime
 import utilidades.generc as utl
 from tktooltip import ToolTip
 from tkinter import simpledialog
+from BaseDatos.control_bd_variables import BD_Variables as BD_Var
 
 class WinAdmin(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -26,9 +27,10 @@ class WinAdmin(ttk.Frame):
         
         self.var_descrip_nombre = tk.StringVar()
         self.var_descrip_cod = tk.StringVar()
-        self.var_descrip_precio = tk.IntVar()
-        self.var_descrip_precio_entra = tk.IntVar()
+        self.var_descrip_precio = tk.DoubleVar()
+        self.var_descrip_precio_entra = tk.DoubleVar()
         self.var_descrip_cantidad = tk.IntVar()
+        self.var_cantidad_inventario = tk.IntVar()
         
         self.var_buscar_nombre = tk.StringVar()
         self.var_buscar_cod = tk.StringVar()
@@ -38,6 +40,7 @@ class WinAdmin(ttk.Frame):
         self.var_valor_ventido_op = IntVar()
         
         self.var_delta_time = tk.IntVar()
+        self.value_ocultar =True
         
         self.foco_frame = None
         
@@ -83,7 +86,8 @@ class WinAdmin(ttk.Frame):
         self.lb_valor_vendido_op.grid(row=0, column=2, padx=10)
         self.valor_vendido_op = LabelP(self.top_frame, textvariable=self.var_valor_ventido_op, style="CCustomMedium.TLabel")
         self.valor_vendido_op.grid(row=0, column=3, padx=10)
-        
+        # Asociar el evento de clic al Label
+        self.lb_valor_vendido_op.bind("<Button-1>", lambda event: self.toggle_visibility())
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
         
@@ -118,6 +122,9 @@ class WinAdmin(ttk.Frame):
         
         self.btn_cambiar_clave  = ttk.Button(self.frame_inventario, text="Cambiar Clave",command=self.cambiar_clave, style="Primary.TButton")
         self.btn_cambiar_clave.grid(row=2, column=0,sticky="nsew")
+        self.btn_devolver_producto = ttk.Button(self.frame_inventario, text="Devolver Producto", command=self.devolver_valor_vendido, style="Primary.TButton")
+        self.btn_devolver_producto.grid(row=3, column=0,sticky="nsew")
+        
         
         self.expandir_widget(self.frame_inventario, row=4, colum=1)
         self.frame_inventario.grid(row=3, column=1, rowspan=2, sticky="nsew")
@@ -170,9 +177,13 @@ class WinAdmin(ttk.Frame):
         self.entry_cantidad_decrip_producto = ttk.Entry(self.frame_descrip_producto, textvariable=self.var_descrip_cantidad,width=20, validate="key", validatecommand=vc)
         self.entry_cantidad_decrip_producto.grid(row=1,column=4,sticky="nsew")
         
+        self.lb_cantidad_inventario = ttk.Label(self.frame_descrip_producto, text="Cant. Inventario",style="CustomSmall.TLabel", width=20).grid(row=0,column=5,sticky="nsew")
+        self.cantidad_inventario = ttk.Label(self.frame_descrip_producto, textvariable=self.var_cantidad_inventario, width=20)
+        self.cantidad_inventario.grid(row=1,column=5,sticky="nsew")
+        
         self.cambiar_widget()
         self.frame_descrip_producto.grid(row=2, column=0,sticky="nsew")
-        self.expandir_widget(self.frame_descrip_producto, colum=4)
+        self.expandir_widget(self.frame_descrip_producto, colum=5)
         
         # Frame lista de productos
         self.frame_lista_producto = ttk.Frame(self)
@@ -184,7 +195,7 @@ class WinAdmin(ttk.Frame):
         self.frame_botones = ttk.Frame(self)
         self.img_mod = utl.leer_imagen("./Imagenes/BTN_Modificar.png", (24,24))
         self.img_add = utl.leer_imagen("./Imagenes/BTN_Agregar.png", (24,24))
-        self.img_per = utl.leer_imagen("./Imagenes/BTN_Agregar.png", (24,24))
+        self.img_per = utl.leer_imagen("./Imagenes/BTN_Percent.png", (24,24))
         
         self.btn_agregar = ttk.Button(self.frame_botones, image=self.img_add, style="Primary.TButton",command=self.agregar_producto)
         self.btn_agregar.grid(row=0, column=3, pady=10)  
@@ -225,6 +236,26 @@ class WinAdmin(ttk.Frame):
         self.entry_cod_descrp_producto.bind("<FocusOut>",self.comprobar_codigo_producto)
         self.entry_nombre_descrp_producto.bind("<FocusOut>",self.comprobar_nombre_producto)
     
+    def toggle_visibility(self):
+        if self.value_ocultar:
+            self.valor_vendido_op.grid_forget()
+            self.value_ocultar = False
+        else:
+            self.valor_vendido_op.grid(row=0, column=3, padx=10)
+            self.value_ocultar = True
+    
+    def devolver_valor_vendido(self):
+        resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "¿Está seguro que desea devolver el valor vendido?")
+        if (resp):
+            valor_resto = simpledialog.askinteger("SOFTRULLO SOLUCIONS", "Ingrese el valor a devolver")
+            value_actualizado = self.var_valor_ventido_op.get() - valor_resto
+            value_actualizado_r = "${:,.2f}".format(value_actualizado)
+            resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", f"El valor actualizado es: {value_actualizado_r}")
+            if (resp):
+                BD_Var.set_valor_ventas_turno(str(value_actualizado))
+                self.actualizar_valor_vendido(value_actualizado)
+                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Operación Exitosa!")
+
     def mesaje (self):
         num = 0
         try:
@@ -269,6 +300,7 @@ class WinAdmin(ttk.Frame):
             messagebox.showinfo("SOFTRULLO SOLUCIONS", "Clave cambiada correctamente")
             BD_Variables.set_clave_admin(clave_nueva)
             notebok_tabs= self.root.tabs()
+            self.root.tab(notebok_tabs[5], state="hidden")
             self.root.tab(notebok_tabs[4], state="hidden")
             self.root.tab(notebok_tabs[2], state="hidden")
             self.root.tab(notebok_tabs[1], state="hidden")
@@ -287,6 +319,7 @@ class WinAdmin(ttk.Frame):
                 self.actualizar_valor_vendido(0)
                 
                 notebok_tabs= self.root.tabs()
+                self.root.tab(notebok_tabs[5], state="hidden")
                 self.root.tab(notebok_tabs[4], state="hidden")
                 self.root.tab(notebok_tabs[2], state="hidden")
                 self.root.tab(notebok_tabs[1], state="hidden")
@@ -319,6 +352,7 @@ class WinAdmin(ttk.Frame):
                     self.var_descrip_precio.set(values[2])
                     self.var_descrip_precio_entra.set(values[3])
                     self.var_descrip_cantidad.set(1)
+                    self.var_cantidad_inventario.set(values[4])
                     
                 elif self.foco_frame == self.entry_nombre_producto:
                     values = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
@@ -327,6 +361,7 @@ class WinAdmin(ttk.Frame):
                     self.var_descrip_precio.set(values[2])
                     self.var_descrip_precio_entra.set(values[3])
                     self.var_descrip_cantidad.set(1)
+                    self.var_cantidad_inventario.set(values[4])
                         
             except  ExcepBus as e:  
                 respuesta=messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Codigo o Nombre no encontrado. ¿Desea agregar uno?")
@@ -349,15 +384,14 @@ class WinAdmin(ttk.Frame):
         if resp:
             try:
                 BD.cargar_inventario(self.win_lista_producto.retornar_productos())
-                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Productos agregados correctamente")
-                self.win_lista_producto.vaciar_productos()
                 
+                self.win_lista_producto.vaciar_productos()
                 self.var_total.set(0)
                 self.out_total.formatear_valor()
                 
                 self.var_total_vendido.set(0)
                 self.out_total_vendido.formatear_valor()
-                
+                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Productos agregados correctamente")
             except:
                 messagebox.showerror("SOFTRULLO SOLUCIONS", """Algo inesperado a ocurrido con la base de datos
                                     por favor comunicarse con el soporte técnico""")
@@ -447,6 +481,7 @@ class WinAdmin(ttk.Frame):
         self.var_descrip_precio.set(0)
         self.var_descrip_precio_entra.set(0)
         self.var_descrip_cantidad.set(0)
+        self.var_cantidad_inventario.set(0)
         
     def doble_click_producto_modificar(self, valores):
         self.cambiar_widget(3)

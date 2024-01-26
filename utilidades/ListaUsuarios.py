@@ -37,7 +37,6 @@ class Listausuario(ttk.Treeview):
     def agregar_usuario(self, user):
         # la construccion del data es necesaria pues a la inicialización
         # De pd.DataFrame se requiere ese formato para ser añadido
-        
         data = {
             SOCIO.cedula:           [user[SOCIO.cedula]],
             SOCIO.nombre:           [user[SOCIO.nombre]],
@@ -46,7 +45,7 @@ class Listausuario(ttk.Treeview):
         }
         res = self.df.loc[self.df[SOCIO.cedula] == data[SOCIO.cedula][0]]
         if (res.empty):
-            self.df = pd.concat([self.df, pd.DataFrame(data)])
+            self.df = pd.concat([self.df, pd.DataFrame(data)], ignore_index=True)
         self.actualizar()    
             
             
@@ -67,11 +66,10 @@ class Listausuario(ttk.Treeview):
         if (len(selection) == 1):
             values = self.item(selection, "values")
             total_cartera =  self.df.loc[self.df[SOCIO.cedula] == values[0], SOCIO.total_cartera].values[0] - abono
-            if (total_cartera >0):
+            if (total_cartera >=0):
                 self.df.loc[self.df[SOCIO.cedula] == values[0], SOCIO.total_cartera] = total_cartera
             else:
                 messagebox.showwarning("SOFTRULLO SOLUCIONS","Va a abonar mas de lo que debe!")
-            
         else:
             messagebox.showwarning("SOFTRULLO SOLUCIONS","Debe seleccionar solamente uno de los usuarios")
         self.actualizar()
@@ -109,3 +107,5 @@ class Listausuario(ttk.Treeview):
         
     def retornar_productos(self):
         return self.df
+    
+    
