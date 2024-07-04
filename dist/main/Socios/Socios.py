@@ -170,18 +170,18 @@ class WinSocios(ttk.Frame):
             self.win_lista_socio.agregar_usuario(self.return_socio_dict(user))
         
     def quitar_abono(self):
-        abono = simpledialog.askinteger("SOFTRULLO SOLUCIONS","Ingrese un valor para quitar abono", initialvalue=0)
+        abono = simpledialog.askinteger("LMH SOLUTIONS","Ingrese un valor para quitar abono", initialvalue=0)
         if(abono>0):
             self.win_lista_socio.abonar_cartera(-abono)
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS","El valor debe ser positivo")   
+            messagebox.showwarning("LMH SOLUTIONS","El valor debe ser positivo")   
     
     def abonar(self):
-        abono = simpledialog.askinteger("SOFTRULLO SOLUCIONS","Ingrese un valor para abonar", initialvalue=0)
+        abono = simpledialog.askinteger("LMH SOLUTIONS","Ingrese un valor para abonar", initialvalue=0)
         if(abono>0):
             self.win_lista_socio.abonar_cartera(abono)
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS","El valor debe ser positivo")
+            messagebox.showwarning("LMH SOLUTIONS","El valor debe ser positivo")
     
     def log_out(self):
         for tab in self.root.tabs():
@@ -190,14 +190,14 @@ class WinSocios(ttk.Frame):
         self.root.select(self.root.tabs()[0])
     
     def guardar_datos(self):
-        resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Esta seguro que va a guardar los datos?")
+        resp = messagebox.askokcancel("LMH SOLUTIONS", "Esta seguro que va a guardar los datos?")
         if (resp):
             try:
                 BD.guardar_info_usuarios(self.win_lista_socio.retornar_productos())
-                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Datos guardados correctamente!")
+                messagebox.showinfo("LMH SOLUTIONS", "Datos guardados correctamente!")
                 self.win_lista_socio.vaciar_productos()
             except:
-                messagebox.showerror("SOFTRULLO SOLUCIONS", "Ha ocurrido un error con la base de datos comuniquese con el técnico de soporte")
+                messagebox.showerror("LMH SOLUTIONS", "Ha ocurrido un error con la base de datos comuniquese con el técnico de soporte")
         
     def salir(self):
         self.app.on_close()
@@ -242,7 +242,7 @@ class WinSocios(ttk.Frame):
                     self.win_lista_socio.vaciar_productos()
                     self.win_lista_socio.agregar_usuario(self.return_socio_dict(values))
             except  ExcepBus as e:  
-                respuesta=messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Cédula o nombre no encontrado. ¿Desea agregar un nuevo usuario?")
+                respuesta=messagebox.askokcancel("LMH SOLUTIONS", "Cédula o nombre no encontrado. ¿Desea agregar un nuevo usuario?")
                 if respuesta:
                     if self.foco_frame == self.entry_codigo:
                         self.agregar_socio(True,self.var_buscar_cod.get())

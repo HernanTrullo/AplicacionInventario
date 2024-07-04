@@ -245,16 +245,16 @@ class WinAdmin(ttk.Frame):
             self.value_ocultar = True
     
     def devolver_valor_vendido(self):
-        resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "¿Está seguro que desea devolver el valor vendido?")
+        resp = messagebox.askokcancel("LMH SOLUTIONS", "¿Está seguro que desea devolver el valor vendido?")
         if (resp):
-            valor_resto = simpledialog.askinteger("SOFTRULLO SOLUCIONS", "Ingrese el valor a devolver")
+            valor_resto = simpledialog.askinteger("LMH SOLUTIONS", "Ingrese el valor a devolver")
             value_actualizado = self.var_valor_ventido_op.get() - valor_resto
             value_actualizado_r = "${:,.2f}".format(value_actualizado)
-            resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", f"El valor actualizado es: {value_actualizado_r}")
+            resp = messagebox.askokcancel("LMH SOLUTIONS", f"El valor actualizado es: {value_actualizado_r}")
             if (resp):
                 BD_Var.set_valor_ventas_turno(str(value_actualizado))
                 self.actualizar_valor_vendido(value_actualizado)
-                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Operación Exitosa!")
+                messagebox.showinfo("LMH SOLUTIONS", "Operación Exitosa!")
 
     def mesaje (self):
         num = 0
@@ -280,24 +280,24 @@ class WinAdmin(ttk.Frame):
         
     def comprobar_nombre_producto(self, event):
         if (BD.esta_el_producto_nombre(self.var_descrip_nombre.get())):
-            messagebox.showwarning("SOFTRULLO SOLUCIONS", "Nombre Duplicado")
+            messagebox.showwarning("LMH SOLUTIONS", "Nombre Duplicado")
             event.widget.focus()
     
     def comprobar_codigo_producto(self, event):
         if (BD.esta_el_producto_cod(self.var_descrip_cod.get())):
-            messagebox.showwarning("SOFTRULLO SOLUCIONS", "Código Duplicado Duplicado")
+            messagebox.showwarning("LMH SOLUTIONS", "Código Duplicado Duplicado")
             event.widget.focus()
         
     def salir(self):
         self.app.on_close()
     
     def cambiar_clave(self):
-        clave_nueva = simpledialog.askstring("SOFTRULLO SOLUCIONS", "Digite una clave de admin nueva")
+        clave_nueva = simpledialog.askstring("LMH SOLUTIONS", "Digite una clave de admin nueva")
         clave_antigua = f"{BD_Variables.get_clave_admin()}"
-        respuesta = messagebox.askokcancel("SOFTRULLO SOLUCIONS", f"""La clave antigua es: {clave_antigua}, la nueva es: {clave_nueva} \n¿Está seguro(a) que va a cambiarla?""")
+        respuesta = messagebox.askokcancel("LMH SOLUTIONS", f"""La clave antigua es: {clave_antigua}, la nueva es: {clave_nueva} \n¿Está seguro(a) que va a cambiarla?""")
         
         if (respuesta):
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Clave cambiada correctamente")
+            messagebox.showinfo("LMH SOLUTIONS", "Clave cambiada correctamente")
             BD_Variables.set_clave_admin(clave_nueva)
             notebok_tabs= self.root.tabs()
             self.root.tab(notebok_tabs[5], state="hidden")
@@ -311,7 +311,7 @@ class WinAdmin(ttk.Frame):
         
     
     def log_out(self):
-        resp = simpledialog.askstring("SOFTRULLO SOLUCIONS", "     Digite la clave de admin     ")
+        resp = simpledialog.askstring("LMH SOLUTIONS", "     Digite la clave de admin     ")
         if (resp == BD_Variables.get_clave_admin()):
             if messagebox.askokcancel("Log Out", "¿Estás seguro de que quieres terminar sesión \nAdicionamente, resetear el valor del acumulado?"):
                 # Resetear el valor de las ventas temporales del dia por el operario
@@ -327,7 +327,7 @@ class WinAdmin(ttk.Frame):
                 self.root.select(notebok_tabs[0])
                     
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS", "¡Tenga cuidado!, la clave debe ser de administrador")
+            messagebox.showwarning("LMH SOLUTIONS", "¡Tenga cuidado!, la clave debe ser de administrador")
             
     def actualizar_valor_vendido (self, value):
         self.var_valor_ventido_op.set(value)
@@ -364,7 +364,7 @@ class WinAdmin(ttk.Frame):
                     self.var_cantidad_inventario.set(values[4])
                         
             except  ExcepBus as e:  
-                respuesta=messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Codigo o Nombre no encontrado. ¿Desea agregar uno?")
+                respuesta=messagebox.askokcancel("LMH SOLUTIONS", "Codigo o Nombre no encontrado. ¿Desea agregar uno?")
                 if respuesta:
                     if self.foco_frame == self.entry_codigo:
                         self.cambiar_widget(2)
@@ -380,7 +380,7 @@ class WinAdmin(ttk.Frame):
             
         
     def cargar_inventario(self):
-        resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "¿Está seguro que desea agregar los productos al inventario?")
+        resp = messagebox.askokcancel("LMH SOLUTIONS", "¿Está seguro que desea agregar los productos al inventario?")
         if resp:
             try:
                 BD.cargar_inventario(self.win_lista_producto.retornar_productos())
@@ -391,9 +391,9 @@ class WinAdmin(ttk.Frame):
                 
                 self.var_total_vendido.set(0)
                 self.out_total_vendido.formatear_valor()
-                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Productos agregados correctamente")
+                messagebox.showinfo("LMH SOLUTIONS", "Productos agregados correctamente")
             except:
-                messagebox.showerror("SOFTRULLO SOLUCIONS", """Algo inesperado a ocurrido con la base de datos
+                messagebox.showerror("LMH SOLUTIONS", """Algo inesperado a ocurrido con la base de datos
                                     por favor comunicarse con el soporte técnico""")
                 
         self.entry_codigo.focus()
@@ -408,7 +408,7 @@ class WinAdmin(ttk.Frame):
             self.actualizar_precio_total()
             self.entry_codigo.focus()
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS", "El precio de venta es menor que el de compra")
+            messagebox.showwarning("LMH SOLUTIONS", "El precio de venta es menor que el de compra")
         
         
     def eliminar_producto(self):
@@ -420,18 +420,18 @@ class WinAdmin(ttk.Frame):
 
     def modificar_producto(self):
         if self.var_descrip_precio.get() > self.var_descrip_precio_entra.get():
-            res = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Está seguro de que desea modificar los parámetros del producto?")
+            res = messagebox.askokcancel("LMH SOLUTIONS", "Está seguro de que desea modificar los parámetros del producto?")
             if res:
                 self.win_lista_producto.modificar_producto(self.retornar_valores_producto())
                 self.cambiar_widget()
                 self.limpiar_variables()
-                messagebox.showinfo("SOFTRULLO SOLUCIONS", "Producto modificado correctamente")
+                messagebox.showinfo("LMH SOLUTIONS", "Producto modificado correctamente")
                 
                 self.bloquear_botones(False)
                 self.actualizar_precio_total()
                 self.entry_codigo.focus()
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS", "El precio de venta es menor que el de compra")
+            messagebox.showwarning("LMH SOLUTIONS", "El precio de venta es menor que el de compra")
                 
     
     

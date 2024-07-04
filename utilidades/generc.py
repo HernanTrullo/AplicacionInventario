@@ -1,7 +1,7 @@
 from PIL import ImageTk, Image
 
 def leer_imagen(path, size):
-    return ImageTk.PhotoImage(Image.open(path).resize(size,Image.ANTIALIAS))
+    return ImageTk.PhotoImage(Image.open(path).resize(size,Image.LANCZOS))
 
 def validar_numero(P):
     # Esta función se llama cada vez que se intenta ingresar un carácter en el Entry

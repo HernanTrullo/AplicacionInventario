@@ -5,12 +5,14 @@ class BD_Variables:
     name_bd = "./BaseDatos/BaseDatos.db"
     
     # Codigos de las variables de que se almacenas temporalmente durante un dia 
+    name_tabla = "Variables"
     ventas_tem_dia = "VVentas_001"
+    valor_compras_tem_dia = "VCompras_001"
     clave_admin = "ClaveAdmin"
     
     @classmethod
     def get_valor_variable(cls, cod):
-        str = f" SELECT {BD_Variables_Mod.valor} FROM Variables WHERE {BD_Variables_Mod.id} = '{cod}'"         
+        str = f" SELECT {BD_Variables_Mod.valor} FROM {cls.name_tabla} WHERE {BD_Variables_Mod.id} = '{cod}'"         
         conn = sqlite3.connect(cls.name_bd)
         cur = conn.cursor()
         res = cur.execute(str)
@@ -20,12 +22,12 @@ class BD_Variables:
     
     @classmethod
     def set_valor_variable(cls, cod, value):
-        str = f""" UPDATE Variables
+        str = f""" UPDATE {cls.name_tabla}
                     SET {BD_Variables_Mod.valor} = '{value}' 
                     WHERE {BD_Variables_Mod.id} = '{cod}';"""
         conn = sqlite3.connect(cls.name_bd)
         cur = conn.cursor()
-        res = cur.execute(str)
+        cur.execute(str)
         conn.commit()
         conn.close()
                 
@@ -36,6 +38,15 @@ class BD_Variables:
     @classmethod
     def get_valor_ventas_turno(cls):
         return cls.get_valor_variable(cls.ventas_tem_dia)[0]
+    
+    @classmethod
+    def get_valor_comprado_stock(cls):
+        return cls.get_valor_variable(cls.valor_compras_tem_dia)[0]
+    
+    @classmethod
+    def set_valor_comprado_stock(cls, value):
+        cls.set_valor_variable(cls.valor_compras_tem_dia, value)
+    
     
     @classmethod    
     def set_clave_admin(cls,value):

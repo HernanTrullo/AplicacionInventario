@@ -88,14 +88,14 @@ class ListaProducto(ttk.Treeview):
     def eliminar_producto(self): 
         selected_item = self.selection()
         if selected_item:
-            res = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Está seguro que desea eliminar el producto")
+            res = messagebox.askokcancel("LMH SOLUTIONS", "Está seguro que desea eliminar el producto")
             if res:
                 for s_item in selected_item:
                     self.df.drop(self.index(s_item),inplace=True)  
                 
                 self.df.reset_index(drop=True, inplace=True)         
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS", "!No ha seleccionado ningún producto¡")   
+            messagebox.showwarning("LMH SOLUTIONS", "!No ha seleccionado ningún producto¡")   
         
         self.actualizar()    
     
@@ -171,3 +171,26 @@ class ListaProducto(ttk.Treeview):
             precio_total +=precio
         
         return precio_total
+    
+    def agregar_productos_en_bloque(self, productos_data):
+        self.vaciar_productos()
+        for dict in productos_data:
+            if len(dict) == 4:
+                data = {
+                    Producto.codigo: dict[Producto.codigo],
+                    Producto.nombre: dict[Producto.nombre],
+                    Producto.precio: dict[Producto.precio],
+                    Producto.cantidad: dict[Producto.cantidad],
+                    Producto.sub_total: [dict[Producto.precio][0] * dict[Producto.cantidad][0]]
+                }
+            elif len(dict)==5:
+                data = {
+                    Producto.codigo:dict[Producto.codigo],
+                    Producto.nombre: dict[Producto.nombre],
+                    Producto.precio: dict[Producto.precio],
+                    Producto.precio_entrada:dict[Producto.precio_entrada],
+                    Producto.cantidad: dict[Producto.cantidad],
+                    Producto.sub_total: [dict[Producto.precio][0] * dict[Producto.cantidad][0]]
+                }
+            self.df =  pd.concat([self.df, pd.DataFrame(data)], ignore_index=True)
+        self.actualizar()

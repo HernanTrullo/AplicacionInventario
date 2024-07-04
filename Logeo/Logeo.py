@@ -17,7 +17,7 @@ class WinLogeo(ttk.Frame):
         
         
     def create_widget(self):
-        self.imagen = utl.leer_imagen("./Imagenes/LogoEmpresa.png", (479,285))
+        self.imagen = utl.leer_imagen("./Imagenes/LogoEmpresa.png", (493,495))
         self.logo = ttk.Label(self,image=self.imagen, style="CustomFrame.TLabel")
         self.logo.grid(row=0, column=0, sticky="nsew")
         
@@ -105,18 +105,18 @@ class WinLogeo(ttk.Frame):
                 self.app.win_inventario.var_delta_time.set(self.app.delta_time)
                 self.app.win_socios.var_delta_time.set(self.app.delta_time)
         except:
-            messagebox.showerror("SOFTTRULLO SOLUCIONES", "Usuario y/o contraseña no válidos")
+            messagebox.showerror("LMH SOLUTIONS", "Usuario y/o contraseña no válidos")
         
         self.clean_entries()
         
     def singup(self):
-        clave= simpledialog.askstring("SOFTRULLO SOLUCIONS","      Ingrese contraseña de admin       ", parent=self)
+        clave= simpledialog.askstring("LMH SOLUTIONS","      Ingrese contraseña de admin       ", parent=self)
         if clave == BD_Variables.get_clave_admin(): # Clave en hexadecimal
             notebok_tabs= self.root.tabs()
             self.root.tab(notebok_tabs[3], state="normal")
             self.root.select(notebok_tabs[3])
         else:
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Contraseña de administrador/soporte no válida")
+            messagebox.showinfo("LMH SOLUTIONS", "Contraseña de administrador/soporte no válida")
         
         self.clean_entries()
             

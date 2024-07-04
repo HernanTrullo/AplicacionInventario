@@ -88,14 +88,14 @@ class ListaProducto(ttk.Treeview):
     def eliminar_producto(self): 
         selected_item = self.selection()
         if selected_item:
-            res = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Está seguro que desea eliminar el producto")
+            res = messagebox.askokcancel("LMH SOLUTIONS", "Está seguro que desea eliminar el producto")
             if res:
                 for s_item in selected_item:
                     self.df.drop(self.index(s_item),inplace=True)  
                 
                 self.df.reset_index(drop=True, inplace=True)         
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS", "!No ha seleccionado ningún producto¡")   
+            messagebox.showwarning("LMH SOLUTIONS", "!No ha seleccionado ningún producto¡")   
         
         self.actualizar()    
     

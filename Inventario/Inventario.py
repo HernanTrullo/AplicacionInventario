@@ -6,6 +6,7 @@ from tkinter import messagebox
 import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
+from BaseDatos.InventarioBD import ProductoDB
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 import datetime
@@ -145,11 +146,12 @@ class WinInventario(ttk.Frame):
                 self.win_lista_producto.vaciar_productos()
                 self.win_lista_producto.agregar_producto(
                 self.retornar_valores_producto(prod))
-            
-            
                 
-        except:
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Producto no encontrado")
+        except ExcepBus as e:
+            messagebox.showinfo("LMH SOLUTIONS", e)
+            
+        except :
+            messagebox.showerror("LMH SOLUTIONS", "Algo ha ocurrido con la aplicación, comuníquese con soporte")
         
         self.vaciar_widget()
     
@@ -195,9 +197,11 @@ class WinInventario(ttk.Frame):
     def cargar_inventario(self):
         productos = BD.obtener_productos()
         self.win_lista_producto.vaciar_productos()
+        productos_data = []
         for producto in productos:
-            self.win_lista_producto.agregar_producto(self.retornar_valores_producto(producto))
-
+            productos_data.append(self.retornar_valores_producto(producto))
+            
+        self.win_lista_producto.agregar_productos_en_bloque(productos_data)
         self.set_valor_total(self.win_lista_producto.calcular_precio_productos_entrada())
         self.set_valor_total_vendido(self.win_lista_producto.calcular_precio_productos_vendido())
         
@@ -211,11 +215,11 @@ class WinInventario(ttk.Frame):
     
     def retornar_valores_producto(self, producto):
         return {
-            Producto.codigo: [producto[0]],
-            Producto.nombre: [producto[1]],
-            Producto.precio: [producto[2]],
-            Producto.precio_entrada: [producto[3]],
-            Producto.cantidad: [producto[4]]
+            Producto.codigo: [producto[ProductoDB.codigo]],
+            Producto.nombre: [producto[ProductoDB.nombre]],
+            Producto.precio: [producto[ProductoDB.precio]],
+            Producto.precio_entrada: [producto[ProductoDB.precio_entrada]],
+            Producto.cantidad: [producto[ProductoDB.cantidad]]
         }
         
         

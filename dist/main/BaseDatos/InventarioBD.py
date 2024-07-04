@@ -76,7 +76,7 @@ class BD_Inventario():
             conn.commit()
             conn.close()
         except sqlite3.IntegrityError as e:
-            messagebox.showerror("SOFTRULLO SOLUCIONS", "Ya ha ingresado artículo con ese código o nombre")
+            messagebox.showerror("LMH SOLUTIONS", "Ya ha ingresado artículo con ese código o nombre")
             conn.close()
     
     @classmethod
@@ -159,7 +159,7 @@ class BD_Inventario():
                 p_actualizado = [producto[0], producto[4]-row[ProductoDB.cantidad]]
                 cls.modificar_cantidad_producto(p_actualizado)
             except:
-                messagebox.showerror("SOFTRULLO SOLUCIONS", "Algo inesperado ha ocurrido con un código interno en la base de datos")
+                messagebox.showerror("LMH SOLUTIONS", "Algo inesperado ha ocurrido con un código interno en la base de datos")
                 
     @classmethod
     def retornar_nombres_productos(cls, clave):

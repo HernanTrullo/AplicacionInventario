@@ -68,14 +68,14 @@ class WinRegistro(ttk.Frame):
     def registrar_usuario(self):
         if (len(self.var_nombre.get())>0 and len(self.var_apellido.get()) >0 and len(self.var_user.get()) > 0 and len(self.var_pass.get()) > 0):
             BD_Usuario.add_user(self.var_nombre.get(), self.var_apellido.get(), self.var_user.get(),self.var_pass.get(), self.var_es_admin.get()) 
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "¡Usuario registrado correctamente!")
+            messagebox.showinfo("LMH SOLUTIONS", "¡Usuario registrado correctamente!")
             notebok_tabs= self.root.tabs()
             self.root.tab(notebok_tabs[3], state="hidden")
             self.root.select(notebok_tabs[0])
             self.limpiar_entries()
             
         else:
-            messagebox.showerror("SOFTRULLO SOLUCIONS", "¡Los campos deben estar introducidos correctamente!")
+            messagebox.showerror("LMH SOLUTIONS", "¡Los campos deben estar introducidos correctamente!")
             
     def limpiar_entries(self):
         self.var_nombre.set("")

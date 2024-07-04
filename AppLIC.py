@@ -61,7 +61,7 @@ class AppLIC(ttk.Frame):
         self.var_fecha_ini.set(date)
         
     def cargar(self):
-        clave= simpledialog.askstring("SOFTRULLO SOLUCIONS","      Ingrese contraseña de admin       ", parent=self)
+        clave= simpledialog.askstring("LMH SOLUTIONS","      Ingrese contraseña de admin       ", parent=self)
         if clave == "434c415645444541444d494e4953545241444f523130313040323032304033303330": # Clave en hexadecimal
             clave = self.var_clave.get()
             state = self.var_ena_clave.get()
@@ -71,9 +71,9 @@ class AppLIC(ttk.Frame):
             dt_data = dt_data + datetime.timedelta(days=self.var_dias_pass.get())
             date_fin = dt_data.strftime("%Y-%m-%d")
             Licencia().set_lic(clave, state, date_ini, date_fin)
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Licencia actualizada existosamente")
+            messagebox.showinfo("LMH SOLUTIONS", "Licencia actualizada existosamente")
         else:
-            messagebox.showerror("SOFTRULLO SOLUCIONS", "Contraseña de administrador/soporte no válida")
+            messagebox.showerror("LMH SOLUTIONS", "Contraseña de administrador/soporte no válida")
             
         
         

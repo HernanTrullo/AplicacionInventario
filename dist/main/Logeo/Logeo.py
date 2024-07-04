@@ -110,13 +110,13 @@ class WinLogeo(ttk.Frame):
         self.clean_entries()
         
     def singup(self):
-        clave= simpledialog.askstring("SOFTRULLO SOLUCIONS","      Ingrese contraseña de admin       ", parent=self)
+        clave= simpledialog.askstring("LMH SOLUTIONS","      Ingrese contraseña de admin       ", parent=self)
         if clave == BD_Variables.get_clave_admin(): # Clave en hexadecimal
             notebok_tabs= self.root.tabs()
             self.root.tab(notebok_tabs[3], state="normal")
             self.root.select(notebok_tabs[3])
         else:
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Contraseña de administrador/soporte no válida")
+            messagebox.showinfo("LMH SOLUTIONS", "Contraseña de administrador/soporte no válida")
         
         self.clean_entries()
             

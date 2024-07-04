@@ -42,7 +42,7 @@ class BD_Usuario:
             conn.commit()
             conn.close()
         except sqlite3.IntegrityError as e:
-            messagebox.showerror("SOFTRULLO SOLUCIONS","Usuario invalido o repetido")
+            messagebox.showerror("LMH SOLUTIONS","Usuario invalido o repetido")
             conn.close()
         
 

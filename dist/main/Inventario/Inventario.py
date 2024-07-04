@@ -149,7 +149,7 @@ class WinInventario(ttk.Frame):
             
                 
         except:
-            messagebox.showinfo("SOFTRULLO SOLUCIONS", "Producto no encontrado")
+            messagebox.showinfo("LMH SOLUTIONS", "Producto no encontrado")
         
         self.vaciar_widget()
     

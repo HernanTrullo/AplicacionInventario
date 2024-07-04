@@ -7,6 +7,7 @@ from tkinter import simpledialog
 import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
+from BaseDatos.InventarioBD import ProductoDB
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 from tkinter import simpledialog
@@ -16,12 +17,17 @@ from BaseDatos.control_bd_variables import BD_Variables as BD_Var
 from BaseDatos.control_bd_socios import BD_Socios as SOCIO
 from BaseDatos.control_bd_socios import UsuarioDB as SOCIO_US
 import numpy as np
+from utilidades.Printer import Printer as Impresora
 
 class WinOperario(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
         super().__init__(root)
         self.root = root
         self.app = app
+        
+        # Se conecta la impresora
+        self.impresora = Impresora()
+        
         # Variables incluidas 
         self.var_nombre_op = tk.StringVar()
         self.var_fecha = tk.StringVar()
@@ -37,6 +43,7 @@ class WinOperario(ttk.Frame):
         
         self.var_total = tk.IntVar()
         self.var_valor_ventido_op = IntVar()
+        self.var_valor_comprado_op_stock = IntVar()
         
         self.var_aporte_cliente = IntVar()
         self.var_saldo_cliente = IntVar()
@@ -59,6 +66,7 @@ class WinOperario(ttk.Frame):
         
     def actualizar(self, event):
         self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
+        
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
         self.top_frame = ttk.Frame(self, style="Cabecera.TFrame")
@@ -217,10 +225,11 @@ class WinOperario(ttk.Frame):
     def vender(self):
         try:
             values_socio = list(SOCIO.buscar_socio_cedula(self.var_cedula_check.get()))
-            resp = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Esta seguro que desea vender los anteriores productos?")
+            resp = messagebox.askokcancel("LMH SOLUTIONS", "Esta seguro que desea vender los anteriores productos?")
             if resp:
                 try:
-                    BD.sacar_productos(self.win_lista_producto.retornar_productos()) # Se sacan los productos de la bases de datos
+                    productos_data_frame =  self.win_lista_producto.retornar_productos()
+                    BD.sacar_productos(productos_data_frame) # Se sacan los productos de la bases de datos
                     value_total_venta = int(BD_Var.get_valor_ventas_turno()) + self.var_total.get() # Valor total de ventas del turno
                     #Se actualizan las variables de afiliado
                     values_socio[3] = self.var_total.get() + values_socio[3]
@@ -235,26 +244,33 @@ class WinOperario(ttk.Frame):
                     }
                     SOCIO.actualizar_socio(dict_u)
                     
+                    # Imprimir la tirilla
+                    if (messagebox.askokcancel("LMH SOLUTIONS", "Desea imprimir el ticket?")):
+                        self.impresora.plotear_datos(self.dataFrame2listTuple(productos_data_frame ), self.var_total.get(), self.var_cedula_check.get())
                     
                     self.win_lista_producto.vaciar_productos()
                     self.var_es_cartera.set(False)
                     self.var_cedula_check.set(0)
                     self.var_saldo_cliente.set(0)
                     self.var_aporte_cliente.set(0)
+                    
                     self.saldo_cliente.formatear_valor()
                     self.actualizar_precio_total()
                     
                     BD_Var.set_valor_ventas_turno(str(value_total_venta))
                     self.actualizar_valor_vendido(value_total_venta)
                     
+                    # Set del valor de compra de los articulos
                     
-                    messagebox.showinfo("SOFTRULLO SOLUCIONS", "Operacion Exitosa!")
+                    BD_Var.set_valor_comprado_stock()
+                    
+                    messagebox.showinfo("LMH SOLUTIONS", "Operacion Exitosa!")
                     
                 except:
-                    messagebox.showerror("SOFTRULLO SOLUCIONS", """Algo inesperado a ocurrido con la base de datos
+                    messagebox.showerror("LMH SOLUTIONS", """Algo inesperado a ocurrido con la base de datos
                                         por favor comunicarse con el soporte técnico""")
         except:
-            messagebox.showerror("SOFTRULLO SOLUCIONS", "Cedula no encontrada, ,verifique la cedula por defecto")
+            messagebox.showerror("LMH SOLUTIONS", "Cedula no encontrada, ,verifique la cedula por defecto")
                                 
     
     
@@ -301,28 +317,30 @@ class WinOperario(ttk.Frame):
         if self.foco_frame == self.entry_codigo or self.foco_frame == self.entry_nombre_producto:
             try:
                 if self.foco_frame == self.entry_codigo:
-                    values = BD.buscar_producto_cod(self.var_buscar_cod.get())   
-                    self.var_descrip_cod.set(values[0])
-                    self.var_descrip_nombre.set(values[1])
-                    self.var_descrip_precio.set(values[2])
+                    producto = BD.buscar_producto_cod(self.var_buscar_cod.get())   
+                    self.var_descrip_cod.set(producto[ProductoDB.codigo])
+                    self.var_descrip_nombre.set(producto[ProductoDB.nombre])
+                    self.var_descrip_precio.set(producto[ProductoDB.precio])
                     
-                    if values[4] < 1:
-                        messagebox.showwarning("SOFTRULLO SOLUCIONS", f"El producto {values[1]} debería estar en stock")
+                    if producto[ProductoDB.cantidad] < 5:
+                        messagebox.showwarning("LMH SOLUTIONS", f"El producto {producto[ProductoDB.nombre]} se está agotando del stock")
                     self.var_descrip_cantidad.set(1)
+                    
                     self.agregar_producto()
                     
                 elif self.foco_frame == self.entry_nombre_producto:
-                    values = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
-                    self.var_descrip_cod.set(values[0])
-                    self.var_descrip_nombre.set(values[1])
-                    self.var_descrip_precio.set(values[2])
-                    if values[4] < 1:
-                        messagebox.showwarning("SOFTRULLO SOLUCIONS", f"El producto {values[1]} debería estar en stock")
-                    self.var_descrip_cantidad.set(1)    
+                    producto = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
+                    self.var_descrip_cod.set(producto[ProductoDB.codigo])
+                    self.var_descrip_nombre.set(producto[ProductoDB.nombre])
+                    self.var_descrip_precio.set(producto[ProductoDB.precio])
+                    if producto[ProductoDB.cantidad] < 1:
+                        messagebox.showwarning("LMH SOLUTIONS", f"El producto {producto[ProductoDB.nombre]} debería estar en stock")
+                    self.var_descrip_cantidad.set(1)
+
                     self.agregar_producto()
                         
             except  ExcepBus as e:  
-                messagebox.showwarning("SOFTRULLO SOLUCIONS", "Codigo o Nombre no encontrado. ¡Vaya al panel de administrador para agregarlo!")
+                messagebox.showwarning("LMH SOLUTIONS", "Codigo o Nombre no encontrado. ¡Vaya al panel de administrador para agregarlo!")
                         
             self.var_buscar_cod.set("")
             self.var_buscar_nombre.set("")
@@ -360,7 +378,7 @@ class WinOperario(ttk.Frame):
         self.var_descrip_nombre.set(valores[1])
         self.var_descrip_precio.set(valores[2])
         
-        res = simpledialog.askinteger("SOFTRULLO SOLUCIONS", "Ingrese una cantidad")
+        res = simpledialog.askinteger("LMH SOLUTIONS", "Ingrese una cantidad")
         if res:
             self.var_descrip_cantidad.set(res)
             self.modificar_producto()
@@ -373,10 +391,19 @@ class WinOperario(ttk.Frame):
             Producto.cantidad: [self.var_descrip_cantidad.get()]
         }
         
+    def dataFrame2listTuple(self, df:pd.DataFrame):
+        prod = list()
+        for index,row in df.iterrows():
+            prod.append((row[Producto.nombre], int(row[Producto.precio]), int(row[Producto.cantidad]), int(row[Producto.sub_total])))
+        return prod
+            
     def actualizar_precio_total(self):
         # Calcular precio total 
         self.var_total.set(self.win_lista_producto.calcular_precio_productos())
         self.out_total.formatear_valor()
+        
+        # Se actualiza tambien el valor total vendido
+        self.var_valor_comprado_op_stock.set()
     
     def actualizar_valor_vendido (self, value):
         self.var_valor_ventido_op.set(value)

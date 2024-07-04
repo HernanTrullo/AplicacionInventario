@@ -69,22 +69,22 @@ class Listausuario(ttk.Treeview):
             if (total_cartera >=0):
                 self.df.loc[self.df[SOCIO.cedula] == values[0], SOCIO.total_cartera] = total_cartera
             else:
-                messagebox.showwarning("SOFTRULLO SOLUCIONS","Va a abonar mas de lo que debe!")
+                messagebox.showwarning("LMH SOLUTIONS","Va a abonar mas de lo que debe!")
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS","Debe seleccionar solamente uno de los usuarios")
+            messagebox.showwarning("LMH SOLUTIONS","Debe seleccionar solamente uno de los usuarios")
         self.actualizar()
         
     def eliminar_usuario(self):
         selected_item = self.selection()
         if selected_item:
-            res = messagebox.askokcancel("SOFTRULLO SOLUCIONS", "Está seguro que desea eliminar el usuario")
+            res = messagebox.askokcancel("LMH SOLUTIONS", "Está seguro que desea eliminar el usuario")
             if res:
                 for s_item in selected_item:
                     self.df.drop(self.index(s_item),inplace=True)  
                 
                 self.df.reset_index(drop=True, inplace=True)         
         else:
-            messagebox.showwarning("SOFTRULLO SOLUCIONS", "!No ha seleccionado ningún producto¡")   
+            messagebox.showwarning("LMH SOLUTIONS", "!No ha seleccionado ningún producto¡")   
         
         self.actualizar()
         

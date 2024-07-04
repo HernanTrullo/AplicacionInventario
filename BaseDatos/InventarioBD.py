@@ -59,9 +59,12 @@ class BD_Inventario():
         conn.close()
         
         if len(res) >0:
-            return res
+            lista_producto = []
+            for producto in res:
+                lista_producto.append(cls.formaterProducto(producto))
+            return lista_producto
         else:
-            raise ExcepBus("No se encunetran productos")
+            raise ExcepBus("No se encuentran productos")
     
     @classmethod
     def agregar_productos(cls,productos):
@@ -76,7 +79,7 @@ class BD_Inventario():
             conn.commit()
             conn.close()
         except sqlite3.IntegrityError as e:
-            messagebox.showerror("SOFTRULLO SOLUCIONS", "Ya ha ingresado artículo con ese código o nombre")
+            messagebox.showerror("LMH SOLUTIONS", "Ya ha ingresado artículo con ese código o nombre")
             conn.close()
     
     @classmethod
@@ -91,7 +94,8 @@ class BD_Inventario():
         conn.close()
         
         if len(res) >0:
-            return res[0] # (cod, nombre, precio, precio_compra, cantidad)
+            return cls.formaterProducto(res[0])
+            #res[0] # (cod, nombre, precio, precio_compra, cantidad)
         else:
             raise ExcepBus("Producto no encontrado")
     
@@ -107,7 +111,7 @@ class BD_Inventario():
         conn.close()
         
         if len(res) >0:
-            return res[0]
+            return cls.formaterProducto(res[0])
         else:
             raise ExcepBus("Producto no encontrado")
     
@@ -124,10 +128,10 @@ class BD_Inventario():
         conn.close()
     
     @classmethod 
-    def modificar_cantidad_producto(cls, producto):
+    def modificar_cantidad_producto(cls, codigo, cantidad):
         str = f""" UPDATE Inventario
-                    SET {ProductoDB.cantidad} = {producto[1]} 
-                    WHERE {ProductoDB.codigo} = '{producto[0]}'"""
+                    SET {ProductoDB.cantidad} = {cantidad} 
+                    WHERE {ProductoDB.codigo} = '{codigo}'"""
         conn = sqlite3.connect(cls.name_bd)           
         cur = conn.cursor()
         cur.execute(str)
@@ -142,7 +146,7 @@ class BD_Inventario():
         for index,row in df.iterrows():
             try:
                 producto = cls.buscar_producto_cod(row[ProductoDB.codigo])
-                p_actualizado = [producto[0], producto[1], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad]+producto[4]]
+                p_actualizado = [producto[ProductoDB.codigo], producto[ProductoDB.nombre], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad]+producto[ProductoDB.cantidad]]
                 cls.modificar_producto(p_actualizado)
             except ExcepBus as e:
                 producto = [
@@ -156,10 +160,10 @@ class BD_Inventario():
         for index,row in df.iterrows():
             try:
                 producto = cls.buscar_producto_cod(row[ProductoDB.codigo])
-                p_actualizado = [producto[0], producto[4]-row[ProductoDB.cantidad]]
-                cls.modificar_cantidad_producto(p_actualizado)
+                cantidad = producto[ProductoDB.cantidad]-row[ProductoDB.cantidad]
+                cls.modificar_cantidad_producto(producto[ProductoDB.codigo], cantidad)
             except:
-                messagebox.showerror("SOFTRULLO SOLUCIONS", "Algo inesperado ha ocurrido con un código interno en la base de datos")
+                messagebox.showerror("LMH SOLUTIONS", "Algo inesperado ha ocurrido con un código interno en la base de datos")
                 
     @classmethod
     def retornar_nombres_productos(cls, clave):
@@ -174,4 +178,14 @@ class BD_Inventario():
             return [nombres[0] for nombres in res]
         else:
             raise ExcepBus("Nombre no encontrado")
-                
+
+    @classmethod
+    def formaterProducto(cls, producto):
+        return {
+            ProductoDB.codigo: producto[0],
+            ProductoDB.nombre: producto[1],
+            ProductoDB.precio: producto[2],
+            ProductoDB.precio_entrada: producto[3],
+            ProductoDB.cantidad: producto[4]
+        }
+    
