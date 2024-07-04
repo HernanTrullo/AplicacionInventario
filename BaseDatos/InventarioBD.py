@@ -164,7 +164,36 @@ class BD_Inventario():
                 cls.modificar_cantidad_producto(producto[ProductoDB.codigo], cantidad)
             except:
                 messagebox.showerror("LMH SOLUTIONS", "Algo inesperado ha ocurrido con un código interno en la base de datos")
-                
+    
+    @classmethod
+    def retornar_valor_compras_stock(cls, df:pd.DataFrame):
+        lista_codigos = []
+        lista_cantidades = []
+        tupla_codigo_cantidad = []
+        for index, row in df.iterrows():
+            lista_codigos.append(row[ProductoDB.codigo])
+            lista_cantidades.append(row[ProductoDB.cantidad])
+            tupla_codigo_cantidad.append((row[ProductoDB.codigo], ProductoDB.cantidad))
+        
+        values = ','.join('?' for _ in lista_codigos)
+        str = f""" SELECT {ProductoDB.codigo},{ProductoDB.precio_entrada} 
+                    FROM Inventario 
+                    WHERE {ProductoDB.codigo} IN ({values})"""
+        
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str, list(lista_codigos))
+        res = res.fetchall()
+        conn.close()
+        
+        dict_codigo_precioEntrada = dict(res)
+            
+        suma = 0
+        for codigo,cantidad in zip(lista_codigos, lista_cantidades):
+            if codigo in dict_codigo_precioEntrada:
+                suma = suma + dict_codigo_precioEntrada[codigo]*cantidad
+        return suma
+        
     @classmethod
     def retornar_nombres_productos(cls, clave):
         str = f""" SELECT {ProductoDB.nombre} FROM Inventario

@@ -16,6 +16,9 @@ import datetime
 from BaseDatos.control_bd_variables import BD_Variables as BD_Var
 from BaseDatos.control_bd_socios import BD_Socios as SOCIO
 from BaseDatos.control_bd_socios import UsuarioDB as SOCIO_US
+from BaseDatos.VentasBD import VentasSql
+from BaseDatos.VentasBD import VentaModel
+
 import numpy as np
 from utilidades.Printer import Printer as Impresora
 
@@ -230,6 +233,9 @@ class WinOperario(ttk.Frame):
                 try:
                     productos_data_frame =  self.win_lista_producto.retornar_productos()
                     BD.sacar_productos(productos_data_frame) # Se sacan los productos de la bases de datos
+                    
+                    valor_comprado_stock =   BD.retornar_valor_compras_stock(productos_data_frame)
+                    
                     value_total_venta = int(BD_Var.get_valor_ventas_turno()) + self.var_total.get() # Valor total de ventas del turno
                     #Se actualizan las variables de afiliado
                     values_socio[3] = self.var_total.get() + values_socio[3]
@@ -246,7 +252,19 @@ class WinOperario(ttk.Frame):
                     
                     # Imprimir la tirilla
                     if (messagebox.askokcancel("LMH SOLUTIONS", "Desea imprimir el ticket?")):
-                        self.impresora.plotear_datos(self.dataFrame2listTuple(productos_data_frame ), self.var_total.get(), self.var_cedula_check.get())
+                        self.impresora.plotear_datos(self.dataFrame2listTuple(productos_data_frame), self.var_total.get(), self.var_cedula_check.get())
+                    
+                    BD_Var.set_valor_ventas_turno(str(value_total_venta))
+                    self.actualizar_valor_vendido(value_total_venta)
+                    
+                    # Set del valor de compra de los articulos
+                    BD_Var.set_valor_comprado_stock(valor_comprado_stock + int(BD_Var.get_valor_comprado_stock()))
+                    
+                    # Enviar datos venta a la base de datos
+                    
+                    fecha_ac = datetime.datetime.now().strftime("""%Y-%m-%d""")
+                    venta = VentaModel(fecha=fecha_ac, total_vendido=self.var_total.get(), total_comprado= valor_comprado_stock)
+                    VentasSql.agregar_venta(venta)
                     
                     self.win_lista_producto.vaciar_productos()
                     self.var_es_cartera.set(False)
@@ -257,20 +275,12 @@ class WinOperario(ttk.Frame):
                     self.saldo_cliente.formatear_valor()
                     self.actualizar_precio_total()
                     
-                    BD_Var.set_valor_ventas_turno(str(value_total_venta))
-                    self.actualizar_valor_vendido(value_total_venta)
-                    
-                    # Set del valor de compra de los articulos
-                    
-                    BD_Var.set_valor_comprado_stock()
-                    
                     messagebox.showinfo("LMH SOLUTIONS", "Operacion Exitosa!")
                     
-                except:
-                    messagebox.showerror("LMH SOLUTIONS", """Algo inesperado a ocurrido con la base de datos
-                                        por favor comunicarse con el soporte técnico""")
-        except:
-            messagebox.showerror("LMH SOLUTIONS", "Cedula no encontrada, ,verifique la cedula por defecto")
+                except NameError as e:
+                    messagebox.showerror("LMH SOLUTIONS", e)
+        except NameError as e:
+            messagebox.showerror("LMH SOLUTIONS", e)
                                 
     
     
@@ -401,9 +411,6 @@ class WinOperario(ttk.Frame):
         # Calcular precio total 
         self.var_total.set(self.win_lista_producto.calcular_precio_productos())
         self.out_total.formatear_valor()
-        
-        # Se actualiza tambien el valor total vendido
-        self.var_valor_comprado_op_stock.set()
     
     def actualizar_valor_vendido (self, value):
         self.var_valor_ventido_op.set(value)
