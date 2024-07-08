@@ -8,6 +8,7 @@ class BD_Variables:
     name_tabla = "Variables"
     ventas_tem_dia = "VVentas_001"
     valor_compras_tem_dia = "VCompras_001"
+    saldo_caja = "SaldoCaja_001"
     clave_admin = "ClaveAdmin"
     
     @classmethod
@@ -40,13 +41,12 @@ class BD_Variables:
         return cls.get_valor_variable(cls.ventas_tem_dia)[0]
     
     @classmethod
-    def get_valor_comprado_stock(cls):
-        return cls.get_valor_variable(cls.valor_compras_tem_dia)[0]
-    
-    @classmethod
     def set_valor_comprado_stock(cls, value):
         cls.set_valor_variable(cls.valor_compras_tem_dia, value)
-    
+        
+    @classmethod
+    def get_valor_comprado_stock(cls):
+        return cls.get_valor_variable(cls.valor_compras_tem_dia)[0]
     
     @classmethod    
     def set_clave_admin(cls,value):
@@ -57,8 +57,19 @@ class BD_Variables:
         return cls.get_valor_variable(cls.clave_admin)[0]
     
     @classmethod
+    def get_saldo_caja(cls):
+        return cls.get_valor_variable(cls.saldo_caja)[0]
+
+    @classmethod
+    def set_saldo_caja(cls, value):
+        return cls.set_valor_variable(cls.saldo_caja, value)
+    
+    
+    @classmethod
     def reset_valor_ventas_turno(cls): # Se resetea el valor de las ventas a cero
         cls.set_valor_variable(cls.ventas_tem_dia,0)
+        cls.set_valor_variable(cls.valor_compras_tem_dia, 0)
+        cls.set_valor_variable(cls.saldo_caja, 0)
         
 class BD_Variables_Mod():
     valor = "Valor"

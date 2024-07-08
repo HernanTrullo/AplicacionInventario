@@ -116,6 +116,22 @@ class BD_Inventario():
             raise ExcepBus("Producto no encontrado")
     
     @classmethod
+    def buscar_producto_nombre_por_codigo(cls,codigo):
+        str = f""" SELECT {ProductoDB.nombre} FROM Inventario
+                    WHERE {ProductoDB.codigo} = '{codigo}'"""            
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res) >0:
+            return res[0][0]
+        else:
+            raise ExcepBus("Producto no encontrado")
+    
+    
+    @classmethod
     def modificar_producto(cls, producto):
         str = f""" UPDATE Inventario
                     SET {ProductoDB.precio} = {producto[2]}, {ProductoDB.precio_entrada}={producto[3]},{ProductoDB.cantidad} = {producto[4]} 

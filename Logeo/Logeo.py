@@ -82,11 +82,6 @@ class WinLogeo(ttk.Frame):
                 self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 self.app.win_socios.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 
-                # Se setean los dias faltantes
-                self.app.win_operario.var_delta_time.set(self.app.delta_time)
-                self.app.win_admin.var_delta_time.set(self.app.delta_time)
-                self.app.win_inventario.var_delta_time.set(self.app.delta_time)
-                self.app.win_socios.var_delta_time.set(self.app.delta_time)
             else:
                 notebok_tabs= self.root.tabs()
                 self.root.tab(notebok_tabs[5], state="normal") # Afiliados
@@ -101,9 +96,6 @@ class WinLogeo(ttk.Frame):
                 self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 self.app.win_socios.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 
-                self.app.win_operario.var_delta_time.set(self.app.delta_time)
-                self.app.win_inventario.var_delta_time.set(self.app.delta_time)
-                self.app.win_socios.var_delta_time.set(self.app.delta_time)
         except:
             messagebox.showerror("LMH SOLUTIONS", "Usuario y/o contraseña no válidos")
         

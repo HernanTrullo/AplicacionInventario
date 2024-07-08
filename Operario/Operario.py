@@ -18,6 +18,7 @@ from BaseDatos.control_bd_socios import BD_Socios as SOCIO
 from BaseDatos.control_bd_socios import UsuarioDB as SOCIO_US
 from BaseDatos.VentasBD import VentasSql
 from BaseDatos.VentasBD import VentaModel
+import random
 
 import numpy as np
 from utilidades.Printer import Printer as Impresora
@@ -51,7 +52,7 @@ class WinOperario(ttk.Frame):
         self.var_aporte_cliente = IntVar()
         self.var_saldo_cliente = IntVar()
         
-        self.var_delta_time = tk.IntVar()
+        self.var_saldo_caja = tk.IntVar()
         self.var_cedula_check = tk.StringVar()
         
         self.var_es_cartera = tk.BooleanVar()
@@ -69,6 +70,7 @@ class WinOperario(ttk.Frame):
         
     def actualizar(self, event):
         self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
+        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
         
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
@@ -95,10 +97,10 @@ class WinOperario(ttk.Frame):
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora, style="CCustomSmall.TLabel")
         self.hora.grid(row=2, column=1)
         
-        self.lb_hora = ttk.Label(self.top_frame, text="Dias de Licencia Restantes: ", style="CCustomLarge.TLabel")
-        self.lb_hora.grid(row=2, column=2)
-        self.hora = ttk.Label(self.top_frame, textvariable=self.var_delta_time, style="CCustomLarge.TLabel")
-        self.hora.grid(row=2, column=3)
+        self.lb_saldo_caja = ttk.Label(self.top_frame, text="Saldo Caja ", style="CCustomLarge.TLabel")
+        self.lb_saldo_caja.grid(row=2, column=2)
+        self.saldo_caja = LabelP(self.top_frame, textvariable=self.var_saldo_caja, style="CCustomLarge.TLabel")
+        self.saldo_caja.grid(row=2, column=3)
         
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
@@ -194,6 +196,9 @@ class WinOperario(ttk.Frame):
         # Agregar fecha y hora
         self.var_fecha.set(datetime.date.today().strftime('%d/%m/%Y'))
         self.actualizar_hora()
+        
+        # Actualizar el saldo de caja
+        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
     
     def toggle_visibility(self):
         if self.value_ocultar:
@@ -259,11 +264,16 @@ class WinOperario(ttk.Frame):
                     
                     # Set del valor de compra de los articulos
                     BD_Var.set_valor_comprado_stock(valor_comprado_stock + int(BD_Var.get_valor_comprado_stock()))
-                    
                     # Enviar datos venta a la base de datos
+                    lista_productos = []
+                    for index, row in productos_data_frame.iterrows():
+                        lista_productos.append({Producto.codigo: row[Producto.codigo]  ,Producto.cantidad: row[Producto.cantidad]})
                     
                     fecha_ac = datetime.datetime.now().strftime("""%Y-%m-%d""")
-                    venta = VentaModel(fecha=fecha_ac, total_vendido=self.var_total.get(), total_comprado= valor_comprado_stock)
+                    tot_vendido = self.var_total.get()
+                    tot_comprado = valor_comprado_stock
+                    
+                    venta = VentaModel(fecha=fecha_ac, total_vendido= tot_vendido, total_comprado= tot_comprado, productos_vendidos= utl.dictToJson(lista_productos))
                     VentasSql.agregar_venta(venta)
                     
                     self.win_lista_producto.vaciar_productos()
@@ -415,6 +425,10 @@ class WinOperario(ttk.Frame):
     def actualizar_valor_vendido (self, value):
         self.var_valor_ventido_op.set(value)
         self.valor_vendido_op.formatear_valor()
+        
+    def actualizar_valor_saldo_caja(self, value):
+        self.var_saldo_caja.set(value)
+        self.saldo_caja.formatear_valor()
         
     def format_currency(self,value):
         return "${:,.2f}".format(value)

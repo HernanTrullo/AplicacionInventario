@@ -24,7 +24,7 @@ class WinInventario(ttk.Frame):
         
         self.var_total = tk.StringVar()
         self.var_total_vendido = tk.StringVar()
-        self.var_delta_time = tk.IntVar()
+
         self.var_buscar_nombre = tk.StringVar()
         self.var_buscar_cod = tk.StringVar()
         
@@ -50,11 +50,6 @@ class WinInventario(ttk.Frame):
         self.lb_hora.grid(row=2, column=0)
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora, style="CCustomSmall.TLabel")
         self.hora.grid(row=2, column=1)
-        
-        self.lb_hora = ttk.Label(self.top_frame, text="Dias de Licencia Restantes: ", style="CCustomLarge.TLabel")
-        self.lb_hora.grid(row=2, column=2)
-        self.hora = ttk.Label(self.top_frame, textvariable=self.var_delta_time, style="CCustomLarge.TLabel")
-        self.hora.grid(row=2, column=3)
         
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
