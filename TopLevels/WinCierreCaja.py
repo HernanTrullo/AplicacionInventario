@@ -79,7 +79,6 @@ class TopLevelWinCierreCaja:
                                         "cantidad": cantidad})
                 
             self.entry_nombre_producto['values']= [dict["nombre"] for dict in self.lista_nombres]
-            
         except ErrorBusqueda as e:
             messagebox.showinfo("LMH SOLUTIOS", "No se han encontrado ventas en las fechas establecidas")
         

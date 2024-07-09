@@ -228,7 +228,8 @@ class WinOperario(ttk.Frame):
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
-        self.after(1000, self.actualizar_hora)
+        self.after_id = self.after(1000, self.actualizar_hora)
+        
         
     def vender(self):
         try:
@@ -265,16 +266,17 @@ class WinOperario(ttk.Frame):
                     # Set del valor de compra de los articulos
                     BD_Var.set_valor_comprado_stock(valor_comprado_stock + int(BD_Var.get_valor_comprado_stock()))
                     # Enviar datos venta a la base de datos
-                    lista_productos = []
-                    for index, row in productos_data_frame.iterrows():
-                        lista_productos.append({Producto.codigo: row[Producto.codigo]  ,Producto.cantidad: row[Producto.cantidad]})
+                    for i in range(1000):    
+                        lista_productos = []
+                        for index, row in productos_data_frame.iterrows():
+                            lista_productos.append({Producto.codigo: row[Producto.codigo]  ,Producto.cantidad: row[Producto.cantidad]})
+                        
+                        fecha_ac = datetime.datetime.now().strftime("""%Y-%m-%d""")
+                        tot_vendido = self.var_total.get()
+                        tot_comprado = valor_comprado_stock
                     
-                    fecha_ac = datetime.datetime.now().strftime("""%Y-%m-%d""")
-                    tot_vendido = self.var_total.get()
-                    tot_comprado = valor_comprado_stock
-                    
-                    venta = VentaModel(fecha=fecha_ac, total_vendido= tot_vendido, total_comprado= tot_comprado, productos_vendidos= utl.dictToJson(lista_productos))
-                    VentasSql.agregar_venta(venta)
+                        venta = VentaModel(fecha=fecha_ac, total_vendido= tot_vendido, total_comprado= tot_comprado, productos_vendidos= utl.dictToJson(lista_productos))
+                        VentasSql.agregar_venta(venta)
                     
                     self.win_lista_producto.vaciar_productos()
                     self.var_es_cartera.set(False)

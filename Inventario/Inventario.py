@@ -175,7 +175,7 @@ class WinInventario(ttk.Frame):
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
-        self.after(1000, self.actualizar_hora)
+        self.after_id = self.after(1000, self.actualizar_hora)
         
     def salir(self):
         self.app.on_close()

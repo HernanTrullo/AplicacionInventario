@@ -7,7 +7,6 @@ import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
 from BaseDatos.InventarioBD import ProductoDB
-
 from BaseDatos.control_bd_variables import BD_Variables
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
@@ -18,7 +17,8 @@ from tkinter import simpledialog
 from BaseDatos.control_bd_variables import BD_Variables as BD_Var
 from utilidades.Printer import Printer
 from TopLevels.WinCierreCaja import TopLevelWinCierreCaja as WinCaja
-
+from TopLevels.WinInformeVentas import TopLevelInformeVentas as WinVentasInforme
+from TopLevels.WinInformeProductos import TopLevelInformeProductos as WinProductoInforme
 
 class WinAdmin(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -120,10 +120,12 @@ class WinAdmin(ttk.Frame):
         self.frame1_usuario = ttk.Frame(self.frame_inventario)
         self.frame2_operaciones = ttk.Frame(self.frame_inventario)
         self.frame3_caja = ttk.Frame(self.frame_inventario)
+        self.frame4_ventas_inventario = ttk.Frame(self.frame_inventario)
         
         self.frame_inventario.add(self.frame2_operaciones, text="Operaciones")
         self.frame_inventario.add(self.frame1_usuario, text="Usuario")
         self.frame_inventario.add(self.frame3_caja, text= "Caja")
+        self.frame_inventario.add(self.frame4_ventas_inventario, text="Ventas e Inventario")
         
         self.btn_cargar_inventario = ttk.Button(self.frame2_operaciones, text="Cargar al inventario", command=self.cargar_inventario,style="Primary.TButton")
         self.btn_cargar_inventario.grid(row=0,column=0,sticky="nsew")
@@ -143,10 +145,17 @@ class WinAdmin(ttk.Frame):
         self.btn_cambiar_clave  = ttk.Button(self.frame1_usuario, text="Cambiar Clave",command=self.cambiar_clave, style="Primary.TButton")
         self.btn_cambiar_clave.grid(row=1, column=0,sticky="nsew")
         
+        self.btn_informe_ventas = ttk.Button(self.frame4_ventas_inventario, text="Informe Ventas",command=self.generar_informe_ventas, style="Primary.TButton")
+        self.btn_informe_ventas.grid(row=0, column=0, sticky="nsew")
+        self.btn_informe_inventario = ttk.Button(self.frame4_ventas_inventario, text="Informe Inventario",command=self.generar_informe_inventario, style="Primary.TButton")
+        self.btn_informe_inventario.grid(row=1, column=0, sticky="nsew")
+        
+        
         self.expandir_widget(self.frame_inventario, row=0, colum=0)
         self.expandir_widget(self.frame1_usuario, row=2, colum=1)
         self.expandir_widget(self.frame2_operaciones, row=2, colum=1)
         self.expandir_widget(self.frame3_caja, row=3, colum=1)
+        self.expandir_widget(self.frame4_ventas_inventario, row=2, colum=1)
         
         self.frame_inventario.grid(row=3, column=1, rowspan=2,columnspan=2, sticky="nsew")
         
@@ -299,7 +308,7 @@ class WinAdmin(ttk.Frame):
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
-        self.after(1000, self.actualizar_hora)
+        self.after_id = self.after(1000, self.actualizar_hora)
         
     def comprobar_nombre_producto(self, event):
         if (BD.esta_el_producto_nombre(self.var_descrip_nombre.get())):
@@ -460,7 +469,14 @@ class WinAdmin(ttk.Frame):
                 self.entry_codigo.focus()
         else:
             messagebox.showwarning("LMH SOLUTIONS", "El precio de venta es menor que el de compra")
-                
+    
+    ## La disposición del inventario y las ventas
+    def generar_informe_ventas(self):
+        self.winVentasInforme = WinVentasInforme(self)
+    
+    def generar_informe_inventario(self):
+        self.winProductoInforme = WinProductoInforme(self)
+    
     def expandir_widget(self, frame:ttk.LabelFrame, row=2, colum=2):
         for i in range(row):
             frame.rowconfigure(i, weight=1)

@@ -30,6 +30,7 @@ class App(ttk.Frame):
     def on_close(self):
         if messagebox.askokcancel("Salir", "¿Estás seguro de que quieres salir?"):
             self.root.destroy()
+            exit()
     
     
     def create_widgets(self):

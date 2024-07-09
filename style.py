@@ -24,7 +24,7 @@ class StyleAPP:
         self.style.configure("CustomFrame.TLabel", background=bg_gen, borderwidth=0)
         
         # Estilos para los botones
-        self.style.configure("Primary.TButton", background=bg_btn, foreground=fr_btn,font=("Helvetica", 13))
+        self.style.configure("Primary.TButton", background=bg_btn, foreground=fr_btn,font=("Roboto", 13))
         self.style.map('TButton',
                 background=[('pressed', bg_btn),
                             ('active', bg_btn_var)]
@@ -36,11 +36,16 @@ class StyleAPP:
         # Estilo TFRAME de cabecera
         self.style.configure("Cabecera.TFrame", background=bg_gen)
         
+        self.style.configure("TCombobox",
+                fieldbackground="white",
+                background= bg_gen,
+                arrowcolor="white")
+        
         ## Estilos para los label general
-        self.style.configure("CustomMedium.TLabel", foreground=cl_letter, background=bg_lb_gen, font=("Helvetica", 15))
-        self.style.configure("CustomSmall.TLabel", foreground=cl_letter, background=bg_lb_gen,font=("Helvetica", 13))
-        self.style.configure("CustomLarge.TLabel", foreground=cl_letter, background=bg_lb_gen,font=("Helvetica", 20))
-        self.style.configure("Clickable.TLabel",foreground=cl_letter, background=bg_lb_gen,font=("Helvetica", 13))
+        self.style.configure("CustomMedium.TLabel", foreground=cl_letter, background=bg_lb_gen, font=("Roboto", 15))
+        self.style.configure("CustomSmall.TLabel", foreground=cl_letter, background=bg_lb_gen,font=("Roboto", 13))
+        self.style.configure("CustomLarge.TLabel", foreground=cl_letter, background=bg_lb_gen,font=("Roboto", 20))
+        self.style.configure("Clickable.TLabel",foreground=cl_letter, background=bg_lb_gen,font=("Roboto", 13))
         self.style.map("Clickable.TLabel",
                     foreground=[('pressed', cl_letter),
                             ('active', bg_gen)],
@@ -51,10 +56,10 @@ class StyleAPP:
         )
         
         ## Estilos para los label cabecera
-        self.style.configure("CCustomMedium.TLabel", foreground=fr_lb_cab, background=bg_lb_cab, font=("Helvetica", 15))
-        self.style.configure("CCustomSmall.TLabel", foreground=fr_lb_cab, background=bg_lb_cab,font=("Helvetica", 13))
-        self.style.configure("CCustomLarge.TLabel", foreground=fr_lb_cab, background=bg_lb_cab,font=("Helvetica", 20))
-        self.style.configure("CErrorCustomMedium.TLabel", foreground="red", background=bg_lb_cab, font=("Helvetica", 15))
+        self.style.configure("CCustomMedium.TLabel", foreground=fr_lb_cab, background=bg_lb_cab, font=("Roboto", 15))
+        self.style.configure("CCustomSmall.TLabel", foreground=fr_lb_cab, background=bg_lb_cab,font=("Roboto", 13))
+        self.style.configure("CCustomLarge.TLabel", foreground=fr_lb_cab, background=bg_lb_cab,font=("Roboto", 20))
+        self.style.configure("CErrorCustomMedium.TLabel", foreground="red", background=bg_lb_cab, font=("Roboto", 15))
         
         
         # Estilo para el treeview
@@ -64,13 +69,13 @@ class StyleAPP:
         # Estilos para los entry 
         self.style.configure("TEntry", foreground="black")
         
-        self.style.configure("Custom.TButton", foreground="blue", font=("Helvetica", 16))
-        self.style.configure("CustomOperacion.TButton", foreground="blue", font=("Helvetica", 12))
-        self.style.configure("CustomQuit.TButton", foreground="red", font=("Helvetica", 16))
+        self.style.configure("Custom.TButton", foreground="blue", font=("Roboto", 16))
+        self.style.configure("CustomOperacion.TButton", foreground="blue", font=("Roboto", 12))
+        self.style.configure("CustomQuit.TButton", foreground="red", font=("Roboto", 16))
         
-        self.style.configure("Custom13.TLabel", foreground="black", font=("Helvetica", 13))
-        self.style.configure("CustomError.TLabel", foreground="red", font=("Helvetica", 16))
+        self.style.configure("Custom13.TLabel", foreground="black", font=("Roboto", 13))
+        self.style.configure("CustomError.TLabel", foreground="red", font=("Roboto", 16))
         
-        self.style.configure("Clickable2.TLabel", background="white",foreground="blue",font=("Helvetica", 14))
+        self.style.configure("Clickable2.TLabel", background="white",foreground="blue",font=("Roboto", 14))
         self.style.configure("RoundedButton.TButton", background="lightblue")
         
