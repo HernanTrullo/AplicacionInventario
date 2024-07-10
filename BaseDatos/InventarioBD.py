@@ -10,6 +10,7 @@ class ProductoDB:
     precio = "Precio"
     precio_entrada = "Precio_Entrada"
     cantidad = "Cantidad"
+    
 
 
 class BD_Inventario():
@@ -221,6 +222,20 @@ class BD_Inventario():
         conn.close()
         if len(res) >0:
             return [nombres[0] for nombres in res]
+        else:
+            raise ExcepBus("Nombre no encontrado")
+        
+    @classmethod
+    def retornar_cantidad_stock(cls, codigo):
+        str = f""" SELECT {ProductoDB.cantidad} FROM Inventario
+                            WHERE {ProductoDB.codigo} = '{codigo}'"""        
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        if len(res) >0:
+            return res[0][0]
         else:
             raise ExcepBus("Nombre no encontrado")
 

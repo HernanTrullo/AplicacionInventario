@@ -9,6 +9,7 @@ class UsuarioDB:
     nombre= "Nombre"
     total_cartera = "Total_Cartera"
     total_comprado = "Total_Comprado"
+    ultima_fecha_abono = "Ultima_Fecha_Abono"
     
 class BD_Socios:
     name_bd = "./BaseDatos/BaseDatos.db"
@@ -141,5 +142,40 @@ class BD_Socios:
         conn.close()
         if len(res) >0:
             return [cedulas[0] for cedulas in res]
+        else:
+            raise ExcepBus("Nombre no encontrado")
+    
+    @classmethod
+    def obtener_fechas_en_mora_socios(cls):
+        str = f""" SELECT {UsuarioDB.nombre}, {UsuarioDB.ultima_fecha_abono} 
+                    FROM Socios
+                    WHERE {UsuarioDB.total_cartera} > 0
+                    ORDER By {UsuarioDB.ultima_fecha_abono} DESC
+                    """        
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        if len(res) >0:
+            return [{UsuarioDB.nombre: item[0], UsuarioDB.ultima_fecha_abono: item[1]} for item in res]
+        else:
+            raise ExcepBus("Nombre no encontrado")
+    
+    @classmethod
+    def obtener_valor_en_mora_socios(cls):
+        str = f""" SELECT {UsuarioDB.nombre}, {UsuarioDB.total_cartera} 
+                    FROM Socios
+                    WHERE {UsuarioDB.total_cartera} > 0 
+                    ORDER By {UsuarioDB.total_cartera} DESC
+                    """
+                    
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        if len(res) >0:
+            return [{UsuarioDB.nombre: item[0], UsuarioDB.total_cartera: item[1]} for item in res][:20]
         else:
             raise ExcepBus("Nombre no encontrado")

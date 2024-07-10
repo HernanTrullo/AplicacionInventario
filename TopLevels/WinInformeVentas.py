@@ -136,12 +136,12 @@ class TopLevelInformeVentas():
         return VentasSql.retornar_valor_diario(fecha_inicio, fecha_fin, categoria)
     
     def obtener_datos_mensuales(self, categoria):
-        fecha_inicio = (datetime.datetime.now() - relativedelta(months=6)).strftime("%Y-%m-%d")
+        fecha_inicio = (datetime.datetime.now() - relativedelta(months=5)).strftime("%Y-%m")
         fecha_fin = datetime.datetime.now().strftime("%Y-%m-%d")
         return VentasSql.retornar_valor_mes(fecha_inicio, fecha_fin, categoria)
     
     def obtener_datos_anuales(self, categoria):
-        fecha_inicio = (datetime.datetime.now() - relativedelta(years=12)).strftime("%Y-%m-%d")
+        fecha_inicio = (datetime.datetime.now() - relativedelta(years=9)).strftime("%Y")
         fecha_fin = datetime.datetime.now().strftime("%Y-%m-%d")
         return VentasSql.retornar_valor_anio(fecha_inicio, fecha_fin, categoria)
     

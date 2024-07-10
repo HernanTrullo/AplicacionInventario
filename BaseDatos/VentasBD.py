@@ -74,7 +74,8 @@ class VentasSql():
         str = f"""  SELECT strftime('%Y-%m', {VentaEstructuraSql.fecha}) AS Mes, SUM({req}) AS Total_Mensual
                     FROM Ventas
                     WHERE {VentaEstructuraSql.fecha} BETWEEN '{fecha_inicio}' AND '{fecha_fin}'
-                    GROUP BY Mes"""        
+                    GROUP BY Mes"""
+        print(str)
         conn = sqlite3.connect(cls.name_bd)
         cur = conn.cursor()
         res = cur.execute(str)
@@ -100,3 +101,21 @@ class VentasSql():
             return [item[0] for item in res],[item[1] for item in res]
         else:
             raise E("Fecha no encontrada")
+        
+    @classmethod
+    def retornar_productos_vendidos(cls, fecha_inicio, fecha_fin):
+        str = f"""  
+                    SELECT {VentaEstructuraSql.productos_vendidos}
+                    FROM Ventas
+                    WHERE {VentaEstructuraSql.fecha} BETWEEN '{fecha_inicio}' AND '{fecha_fin}'
+                """ 
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        if len(res) >0:
+            return [item[0] for item in res] # Voy a retornar los productos vendidos
+        else:
+            raise E("Fecha no encontrada")
+    
