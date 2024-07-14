@@ -18,6 +18,8 @@ from BaseDatos.control_bd_socios import BD_Socios as SOCIO
 from BaseDatos.control_bd_socios import UsuarioDB as SOCIO_US
 from BaseDatos.VentasBD import VentasSql
 from BaseDatos.VentasBD import VentaModel
+import TopLevels.controller as controller
+from utilidades.Infomes import Informe
 import random
 
 import numpy as np
@@ -162,16 +164,29 @@ class WinOperario(ttk.Frame):
         self.es_cartera = ttk.Checkbutton(self.frame_calculo_cuenta, variable=self.var_es_cartera)
         self.es_cartera.grid(row=3, column=1)
         
-        self.btn_vender  = ttk.Button(self.frame_calculo_cuenta, text="Vender",command=self.vender, style="Primary.TButton")
-        self.btn_vender.grid(row=4, column=0, columnspan=2, sticky="nsew")
+        self.notebook_buttons = ttk.Notebook(self.frame_calculo_cuenta)
+        self.notebook_buttons.grid(row=4, column=0, columnspan=2, sticky="nsew")
         
-        self.btn_salir  = ttk.Button(self.frame_calculo_cuenta, text="Salir",command=self.salir, style="Primary.TButton")
-        self.btn_salir.grid(row=5, column=0, columnspan=2,sticky="nsew")
+        self.frame1_ventas_caja = ttk.Frame(self.notebook_buttons)
+        self.frame2_opciones_user = ttk.Frame(self.notebook_buttons)
+        self.notebook_buttons.add(self.frame1_ventas_caja, text="Ventas y Caja")
+        self.notebook_buttons.add(self.frame2_opciones_user, text="Opciones de Usuario")
         
-        self.btn_log_out  = ttk.Button(self.frame_calculo_cuenta, text="Salir Cuenta",command=self.log_out, style="Primary.TButton")
-        self.btn_log_out.grid(row=6, column=0, columnspan=2,sticky="nsew")
+        self.btn_vender  = ttk.Button(self.frame1_ventas_caja, text="Vender",command=self.vender, style="Primary.TButton")
+        self.btn_vender.grid(row=0, column=0, sticky="nsew")
+        self.btn_vender  = ttk.Button(self.frame1_ventas_caja, text="Cerrar Caja",command=self.cerrar_caja, style="Primary.TButton")
+        self.btn_vender.grid(row=1, column=0, sticky="nsew")
         
-        self.expandir_widget(self.frame_calculo_cuenta, row=7, colum=2)
+        self.btn_salir  = ttk.Button(self.frame2_opciones_user, text="Salir",command=self.salir, style="Primary.TButton")
+        self.btn_salir.grid(row=0, column=0,sticky="nsew")
+        self.btn_log_out  = ttk.Button(self.frame2_opciones_user, text="Salir Cuenta",command=self.log_out, style="Primary.TButton")
+        self.btn_log_out.grid(row=1, column=0,sticky="nsew")
+        
+        self.expandir_widget(self.frame1_ventas_caja, row=2, colum=1)
+        self.expandir_widget(self.frame2_opciones_user, row=2, colum=1)
+        self.expandir_widget(self.frame_calculo_cuenta, row=3, colum=2)
+        
+        self.frame_calculo_cuenta.rowconfigure(4, weight=2)
         self.frame_calculo_cuenta.grid(row=2, column=1,sticky="nsew")
         
         # Frame lista de productos
@@ -230,7 +245,31 @@ class WinOperario(ttk.Frame):
         self.var_hora.set(hora_actual)
         self.after_id = self.after(1000, self.actualizar_hora)
         
-        
+    def cerrar_caja(self):
+        if messagebox.askokcancel("Cierre de Caja", "¿Estás seguro de que quieres cerrar caja?\nAdicionamente, generar el informe del cierre de caja?"):
+            # Una funcion para imprimir un resumen del informes
+            try:
+                saldo_caja = BD_Var.get_saldo_caja() 
+                ventas_turno = BD_Var.get_valor_ventas_turno()
+                
+                fecha = datetime.datetime.now().strftime("%Y-%m-%d")
+                codigos_json = VentasSql.retornar_codigo_productos_vendidos(fecha)
+                resultado = controller.obtener_dict_codigo_cantidad(codigos_json)
+                
+                self.lista_nombres = []        
+                for codigo, cantidad in resultado.items():
+                    self.lista_nombres.append({"nombre":BD.buscar_producto_nombre_por_codigo(codigo),
+                                            "cantidad": cantidad})
+            except ExcepBus as e:
+                messagebox.showinfo("LMH SOLUTIOS", "No se han encontrado ventas en las fechas establecidas")
+            
+            Informe.generar_informe_caja(int(ventas_turno), int(saldo_caja), self.lista_nombres)
+    
+            # Resetear el valor de las ventas temporales del dia por el operario
+            # self.actualizar_valor_vendido(0)
+            # self.actualizar_valor_saldo_caja(0)
+            # BD_Var.reset_valor_ventas_turno()
+    
     def vender(self):
         try:
             values_socio = list(SOCIO.buscar_socio_cedula(self.var_cedula_check.get()))

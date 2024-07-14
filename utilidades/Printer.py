@@ -1,6 +1,6 @@
 import win32print
 import datetime
-
+import win32ui
 
 class Printer():
     def __init__(self) -> None:
@@ -79,7 +79,9 @@ class Printer():
         
         for i in range(3):
             self.imprimir_salto_de_linea()
-            
+        
+        win32print.WritePrinter(self.hPrinter, b'\x1B\x70\x00\x19\xFA')
+        win32print.EndPagePrinter(self.hPrinter)
         win32print.EndDocPrinter(self.hPrinter)
         
         

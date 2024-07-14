@@ -107,6 +107,10 @@ class TopLevelInformeProductos():
             indice_rot = self.retornar_indice_rotacion(12)
         
         indice_rot = sorted(indice_rot, key=lambda x: x['Ir'], reverse=True)
+        indice_rot = [producto for producto in indice_rot if producto["Ir"] > 0]
+        if (len(indice_rot)>20):
+            indice_rot = indice_rot[:20]
+            
         self.categorias = [producto["nombre"][:19] for producto in indice_rot]
         self.values = [producto["Ir"] for producto in indice_rot]
         
@@ -123,7 +127,7 @@ class TopLevelInformeProductos():
             lista_codigos = self.retornar_cantidad_productos_anual()
             
         resultado = controller.obtener_dict_codigo_cantidad(lista_codigos)
-        indice_rotacion = []    
+        indice_rotacion = []
         for codigo, cantidad in resultado.items():
             try:
                 indice_rotacion.append({"nombre":BD.buscar_producto_nombre_por_codigo(codigo),
@@ -131,6 +135,8 @@ class TopLevelInformeProductos():
             except ZeroDivisionError as e:
                 indice_rotacion.append({"nombre":BD.buscar_producto_nombre_por_codigo(codigo),
                                     "Ir": 0})
+            except:
+                pass
         return indice_rotacion
     
     def retornar_cantidad_productos_mensual(self, meses):

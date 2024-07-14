@@ -75,7 +75,6 @@ class VentasSql():
                     FROM Ventas
                     WHERE {VentaEstructuraSql.fecha} BETWEEN '{fecha_inicio}' AND '{fecha_fin}'
                     GROUP BY Mes"""
-        print(str)
         conn = sqlite3.connect(cls.name_bd)
         cur = conn.cursor()
         res = cur.execute(str)

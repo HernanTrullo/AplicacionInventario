@@ -39,6 +39,7 @@ class WinAdmin(ttk.Frame):
         
         self.var_buscar_nombre = tk.StringVar()
         self.var_buscar_cod = tk.StringVar()
+        self.var_categoria = tk.StringVar()
         
         self.var_total = tk.StringVar()
         self.var_total_vendido = tk.StringVar()
@@ -136,9 +137,6 @@ class WinAdmin(ttk.Frame):
         self.btn_cierre_caja.grid(row=0, column=0,sticky="nsew")
         self.btn_asignar_saldo_caja = ttk.Button(self.frame3_caja, text="Asignar Saldo Caja", command=self.asignar_saldo_caja, style="Primary.TButton")
         self.btn_asignar_saldo_caja.grid(row=1, column=0, sticky="nsew")
-        self.btn_cierre_caja = ttk.Button(self.frame3_caja, text="Cerrar Caja", command=self.cierre_de_caja, style="Primary.TButton")
-        self.btn_cierre_caja.grid(row=2, column=0, sticky="nsew")
-        
         
         self.btn_salir  = ttk.Button(self.frame1_usuario, text="Salir",command=self.salir, style="Primary.TButton")
         self.btn_salir.grid(row=0, column=0,sticky="nsew")
@@ -154,7 +152,7 @@ class WinAdmin(ttk.Frame):
         self.expandir_widget(self.frame_inventario, row=0, colum=0)
         self.expandir_widget(self.frame1_usuario, row=2, colum=1)
         self.expandir_widget(self.frame2_operaciones, row=2, colum=1)
-        self.expandir_widget(self.frame3_caja, row=3, colum=1)
+        self.expandir_widget(self.frame3_caja, row=2, colum=1)
         self.expandir_widget(self.frame4_ventas_inventario, row=2, colum=1)
         
         self.frame_inventario.grid(row=3, column=1, rowspan=2,columnspan=2, sticky="nsew")
@@ -174,7 +172,14 @@ class WinAdmin(ttk.Frame):
         self.entry_nombre_producto.grid(row=1, column=1,sticky="nsew")
         self.entry_nombre_producto.bind("<KeyRelease>", self.actualizar_nombre_productos)
         
-        self.expandir_widget(self.ingreso_datos, colum=3)
+        self.lb_categoria = ttk.Label(self.ingreso_datos, text="Categoria",style="CustomSmall.TLabel")
+        self.lb_categoria.grid(row=0, column=2)
+        self.entry_categoria= ttk.Combobox(self.ingreso_datos, textvariable=self.var_categoria)
+        self.entry_categoria.grid(row=1, column=2,sticky="nsew")
+        
+        self.entry_categoria["values"] = ["Tienda", "Almacen"]
+        
+        self.expandir_widget(self.ingreso_datos, colum=3, row=3)
         self.ingreso_datos.grid(row=1, column=0,sticky="nsew",pady=20)
         
         # Frame descripción del producto (Compra)
@@ -349,20 +354,7 @@ class WinAdmin(ttk.Frame):
                 
                 BD_Var.set_saldo_caja(self.var_saldo_caja.get())
                 messagebox.showinfo("LMH SOLUTIONS", "Saldo añadido correctamente")
-    
-    def cierre_de_caja(self):
-        resp = simpledialog.askstring("LMH SOLUTIONS", "Digite la clave de admin,\n¡Es importante por seguridad!")
-        if (resp == BD_Variables.get_clave_admin()):
-            if messagebox.askokcancel("Cierre de Caja", "¿Estás seguro de que quieres cerrar caja?\nAdicionamente, generar el informe del cierre de caja?"):
-                # Resetear el valor de las ventas temporales del dia por el operario
-                self.actualizar_valor_vendido(0)
-                self.actualizar_valor_saldo_caja(0)
-                BD_Variables.reset_valor_ventas_turno()
                 
-                # Una funcion para imprimir un resumen del informe
-                    
-        else:
-            messagebox.showwarning("LMH SOLUTIONS", "¡Tenga cuidado!, la clave debe ser de administrador")
 
     def cierre_de_caja_infome(self):
         self.win_caja = WinCaja(self, BD_Var.get_saldo_caja(), BD_Var.get_valor_ventas_turno())
