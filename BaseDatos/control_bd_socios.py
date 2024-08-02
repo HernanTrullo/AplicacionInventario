@@ -2,6 +2,7 @@ import sqlite3
 from tkinter import messagebox
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 import pandas as pd
+from datetime import datetime
 
 
 class UsuarioDB:
@@ -18,8 +19,8 @@ class BD_Socios:
     def agregar_socio(cls,user):
         try:
             str = f"""INSERT INTO Socios
-            ({UsuarioDB.cedula},{UsuarioDB.nombre}, {UsuarioDB.total_cartera}, {UsuarioDB.total_comprado}) 
-            VALUES ('{user[UsuarioDB.cedula]}','{user[UsuarioDB.nombre]}',{user[UsuarioDB.total_cartera]},{user[UsuarioDB.total_comprado]})"""
+            ({UsuarioDB.cedula},{UsuarioDB.nombre}, {UsuarioDB.total_cartera}, {UsuarioDB.total_comprado}, {UsuarioDB.ultima_fecha_abono}) 
+            VALUES ('{user[UsuarioDB.cedula]}','{user[UsuarioDB.nombre]}',{user[UsuarioDB.total_cartera]},{user[UsuarioDB.total_comprado]}, '{datetime.now().strftime("%Y-%m-%d")}')"""
             
             conn = sqlite3.connect(cls.name_bd)
             cur = conn.cursor()
@@ -41,8 +42,8 @@ class BD_Socios:
                     UsuarioDB.cedula: row[UsuarioDB.cedula],
                     UsuarioDB.nombre: row[UsuarioDB.nombre],
                     UsuarioDB.total_cartera: row[UsuarioDB.total_cartera],
-                    UsuarioDB.total_comprado: row[UsuarioDB.total_comprado]
-                    
+                    UsuarioDB.total_comprado: row[UsuarioDB.total_comprado],
+                    UsuarioDB.ultima_fecha_abono: datetime.now().strftime("%Y-%m-%d")
                 }
                 cls.agregar_socio(socio)
     
@@ -58,7 +59,7 @@ class BD_Socios:
     @classmethod
     def actualizar_socio(cls,user):
         str = f""" UPDATE Socios
-                    SET {UsuarioDB.cedula} = '{user[UsuarioDB.cedula]}', {UsuarioDB.nombre} = '{user[UsuarioDB.nombre]}',{UsuarioDB.total_cartera} = {user[UsuarioDB.total_cartera]}, {UsuarioDB.total_comprado}={user[UsuarioDB.total_comprado]}
+                    SET {UsuarioDB.total_cartera} = {user[UsuarioDB.total_cartera]}, {UsuarioDB.ultima_fecha_abono}='{datetime.now().strftime("%Y-%m-%d")}'
                     WHERE {UsuarioDB.cedula} = '{user[UsuarioDB.cedula]}'"""
         
         

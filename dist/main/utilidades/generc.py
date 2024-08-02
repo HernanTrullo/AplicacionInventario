@@ -1,4 +1,5 @@
 from PIL import ImageTk, Image
+import json
 
 def leer_imagen(path, size):
     return ImageTk.PhotoImage(Image.open(path).resize(size,Image.LANCZOS))
@@ -16,3 +17,9 @@ def validar_numero(P):
         return True
     except ValueError:
         return False
+    
+def jsonToDict(jsonValue):
+    return json.loads(jsonValue)
+    
+def dictToJson(stringValue):
+    return json.dumps(stringValue)

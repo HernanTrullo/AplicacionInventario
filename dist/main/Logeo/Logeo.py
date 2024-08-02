@@ -17,7 +17,7 @@ class WinLogeo(ttk.Frame):
         
         
     def create_widget(self):
-        self.imagen = utl.leer_imagen("./Imagenes/LogoEmpresa.png", (479,285))
+        self.imagen = utl.leer_imagen("./Imagenes/LogoEmpresa.png", (493,495))
         self.logo = ttk.Label(self,image=self.imagen, style="CustomFrame.TLabel")
         self.logo.grid(row=0, column=0, sticky="nsew")
         
@@ -82,17 +82,15 @@ class WinLogeo(ttk.Frame):
                 self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 self.app.win_socios.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 
-                # Se setean los dias faltantes
-                self.app.win_operario.var_delta_time.set(self.app.delta_time)
-                self.app.win_admin.var_delta_time.set(self.app.delta_time)
-                self.app.win_inventario.var_delta_time.set(self.app.delta_time)
-                self.app.win_socios.var_delta_time.set(self.app.delta_time)
             else:
                 notebok_tabs= self.root.tabs()
-                self.root.tab(notebok_tabs[5], state="normal") # Afiliados
-                self.root.tab(notebok_tabs[4], state="normal") # Inventario
                 self.root.tab(notebok_tabs[1], state="normal") #Operario
+                self.root.tab(notebok_tabs[5], state="normal") # Afiliados
+                self.root.tab(notebok_tabs[2], state="normal") # Admin
+                self.root.tab(notebok_tabs[4], state="hidden") # Inventario
                 self.root.tab(notebok_tabs[0], state="hidden") #Logeo
+                
+                
                 
                 self.root.select(notebok_tabs[1])
                 # Se setea el nombre del operario
@@ -101,11 +99,8 @@ class WinLogeo(ttk.Frame):
                 self.app.win_inventario.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 self.app.win_socios.var_nombre_op.set(f"{dato[0]} {dato[1]}")
                 
-                self.app.win_operario.var_delta_time.set(self.app.delta_time)
-                self.app.win_inventario.var_delta_time.set(self.app.delta_time)
-                self.app.win_socios.var_delta_time.set(self.app.delta_time)
         except:
-            messagebox.showerror("SOFTTRULLO SOLUCIONES", "Usuario y/o contraseña no válidos")
+            messagebox.showerror("LMH SOLUTIONS", "Usuario y/o contraseña no válidos")
         
         self.clean_entries()
         

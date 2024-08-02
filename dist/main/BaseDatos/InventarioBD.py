@@ -10,6 +10,17 @@ class ProductoDB:
     precio = "Precio"
     precio_entrada = "Precio_Entrada"
     cantidad = "Cantidad"
+    categoria = "Categoria"
+
+class Categorias:
+    tienda= "Tienda"
+    almacen = "Almacen"
+    ferreteria = "Ferreterria"
+    papeleriaEscolar = "Papeleria y Escolar"
+    dulceria = "Dulceria"
+    concentradoProductosVet = "Concentrado y Productos Vet"
+    farmacia = "Farmacia"
+    categorias = ["Tienda","Almacen", "Ferreterria","Papeleria y Escolar","Dulceria","Concentrado y Productos Vet", "Farmacia"]
 
 
 class BD_Inventario():
@@ -49,8 +60,11 @@ class BD_Inventario():
         return hay_producto
     
     @classmethod
-    def obtener_productos(cls):
-        str = f"SELECT * FROM Inventario ORDER BY {ProductoDB.codigo}"
+    def obtener_productos(cls, categoria = Categorias.tienda):
+        str = f"""SELECT * 
+                    FROM Inventario
+                    WHERE {ProductoDB.categoria} = '{categoria}'
+                    ORDER BY {ProductoDB.cantidad} ASC"""
                     
         conn = sqlite3.connect(cls.name_bd)
         cur = conn.cursor()
@@ -59,16 +73,39 @@ class BD_Inventario():
         conn.close()
         
         if len(res) >0:
-            return res
+            lista_producto = []
+            for producto in res:
+                lista_producto.append(cls.formaterProducto(producto))
+            return lista_producto
         else:
-            raise ExcepBus("No se encunetran productos")
+            raise ExcepBus("No se encuentran productos")
+    
+    @classmethod
+    def obtener_productos_totales(cls):
+        str = f"""SELECT * 
+                    FROM Inventario
+                    ORDER BY {ProductoDB.cantidad} ASC"""
+                    
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res) >0:
+            lista_producto = []
+            for producto in res:
+                lista_producto.append(cls.formaterProducto(producto))
+            return lista_producto
+        else:
+            raise ExcepBus("No se encuentran productos")
     
     @classmethod
     def agregar_productos(cls,productos):
         try:
             str = f"""INSERT INTO Inventario
-            ({ProductoDB.codigo},{ProductoDB.nombre},{ProductoDB.precio},{ProductoDB.precio_entrada},{ProductoDB.cantidad}) 
-            VALUES (?,?,?,?,?)"""
+            ({ProductoDB.codigo},{ProductoDB.nombre},{ProductoDB.precio},{ProductoDB.precio_entrada},{ProductoDB.cantidad},{ProductoDB.categoria}) 
+            VALUES (?,?,?,?,?,?)"""
             
             conn = sqlite3.connect(cls.name_bd)
             cur = conn.cursor()
@@ -91,7 +128,8 @@ class BD_Inventario():
         conn.close()
         
         if len(res) >0:
-            return res[0] # (cod, nombre, precio, precio_compra, cantidad)
+            return cls.formaterProducto(res[0])
+            #res[0] # (cod, nombre, precio, precio_compra, cantidad, categoria)
         else:
             raise ExcepBus("Producto no encontrado")
     
@@ -107,14 +145,30 @@ class BD_Inventario():
         conn.close()
         
         if len(res) >0:
-            return res[0]
+            return cls.formaterProducto(res[0])
         else:
             raise ExcepBus("Producto no encontrado")
     
     @classmethod
+    def buscar_producto_nombre_por_codigo(cls,codigo):
+        str = f""" SELECT {ProductoDB.nombre} FROM Inventario
+                    WHERE {ProductoDB.codigo} = '{codigo}'"""            
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res) >0:
+            return res[0][0]
+        else:
+            raise ExcepBus("Producto no encontrado")
+    
+    
+    @classmethod
     def modificar_producto(cls, producto):
         str = f""" UPDATE Inventario
-                    SET {ProductoDB.precio} = {producto[2]}, {ProductoDB.precio_entrada}={producto[3]},{ProductoDB.cantidad} = {producto[4]} 
+                    SET {ProductoDB.precio} = {producto[2]}, {ProductoDB.precio_entrada}={producto[3]},{ProductoDB.cantidad} = {producto[4]}, {ProductoDB.categoria} = '{producto[5]}' 
                     WHERE {ProductoDB.codigo} = '{producto[0]}'"""
         conn = sqlite3.connect(cls.name_bd)           
         cur = conn.cursor()
@@ -124,10 +178,10 @@ class BD_Inventario():
         conn.close()
     
     @classmethod 
-    def modificar_cantidad_producto(cls, producto):
+    def modificar_cantidad_producto(cls, codigo, cantidad):
         str = f""" UPDATE Inventario
-                    SET {ProductoDB.cantidad} = {producto[1]} 
-                    WHERE {ProductoDB.codigo} = '{producto[0]}'"""
+                    SET {ProductoDB.cantidad} = {cantidad} 
+                    WHERE {ProductoDB.codigo} = '{codigo}'"""
         conn = sqlite3.connect(cls.name_bd)           
         cur = conn.cursor()
         cur.execute(str)
@@ -142,11 +196,11 @@ class BD_Inventario():
         for index,row in df.iterrows():
             try:
                 producto = cls.buscar_producto_cod(row[ProductoDB.codigo])
-                p_actualizado = [producto[0], producto[1], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad]+producto[4]]
+                p_actualizado = [producto[ProductoDB.codigo], producto[ProductoDB.nombre], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad]+producto[ProductoDB.cantidad], row[ProductoDB.categoria]]
                 cls.modificar_producto(p_actualizado)
             except ExcepBus as e:
                 producto = [
-                    (row[ProductoDB.codigo], row[ProductoDB.nombre], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad])
+                    (row[ProductoDB.codigo], row[ProductoDB.nombre], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad], row[ProductoDB.categoria])
                 ]
                 cls.agregar_productos(producto)
             
@@ -156,11 +210,40 @@ class BD_Inventario():
         for index,row in df.iterrows():
             try:
                 producto = cls.buscar_producto_cod(row[ProductoDB.codigo])
-                p_actualizado = [producto[0], producto[4]-row[ProductoDB.cantidad]]
-                cls.modificar_cantidad_producto(p_actualizado)
+                cantidad = producto[ProductoDB.cantidad]-row[ProductoDB.cantidad]
+                cls.modificar_cantidad_producto(producto[ProductoDB.codigo], cantidad)
             except:
                 messagebox.showerror("LMH SOLUTIONS", "Algo inesperado ha ocurrido con un código interno en la base de datos")
-                
+    
+    @classmethod
+    def retornar_valor_compras_stock(cls, df:pd.DataFrame):
+        lista_codigos = []
+        lista_cantidades = []
+        tupla_codigo_cantidad = []
+        for index, row in df.iterrows():
+            lista_codigos.append(row[ProductoDB.codigo])
+            lista_cantidades.append(row[ProductoDB.cantidad])
+            tupla_codigo_cantidad.append((row[ProductoDB.codigo], ProductoDB.cantidad))
+        
+        values = ','.join('?' for _ in lista_codigos)
+        str = f""" SELECT {ProductoDB.codigo},{ProductoDB.precio_entrada} 
+                    FROM Inventario 
+                    WHERE {ProductoDB.codigo} IN ({values})"""
+        
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str, list(lista_codigos))
+        res = res.fetchall()
+        conn.close()
+        
+        dict_codigo_precioEntrada = dict(res)
+            
+        suma = 0
+        for codigo,cantidad in zip(lista_codigos, lista_cantidades):
+            if codigo in dict_codigo_precioEntrada:
+                suma = suma + dict_codigo_precioEntrada[codigo]*cantidad
+        return suma
+        
     @classmethod
     def retornar_nombres_productos(cls, clave):
         str = f""" SELECT {ProductoDB.nombre} FROM Inventario
@@ -174,4 +257,29 @@ class BD_Inventario():
             return [nombres[0] for nombres in res]
         else:
             raise ExcepBus("Nombre no encontrado")
-                
+        
+    @classmethod
+    def retornar_cantidad_stock(cls, codigo):
+        str = f""" SELECT {ProductoDB.cantidad} FROM Inventario
+                            WHERE {ProductoDB.codigo} = '{codigo}'"""        
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        if len(res) >0:
+            return res[0][0]
+        else:
+            raise ExcepBus("Nombre no encontrado")
+
+    @classmethod
+    def formaterProducto(cls, producto):
+        return {
+            ProductoDB.codigo: producto[0],
+            ProductoDB.nombre: producto[1],
+            ProductoDB.precio: producto[2],
+            ProductoDB.precio_entrada: producto[3],
+            ProductoDB.cantidad: producto[4],
+            ProductoDB.categoria: producto[5]
+        }
+    

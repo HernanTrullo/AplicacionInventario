@@ -8,6 +8,7 @@ from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
 from BaseDatos.InventarioBD import ProductoDB
 from BaseDatos.control_bd_variables import BD_Variables
+from BaseDatos.InventarioBD import Categorias as Cat
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 import datetime
@@ -172,13 +173,6 @@ class WinAdmin(ttk.Frame):
         self.entry_nombre_producto.grid(row=1, column=1,sticky="nsew")
         self.entry_nombre_producto.bind("<KeyRelease>", self.actualizar_nombre_productos)
         
-        self.lb_categoria = ttk.Label(self.ingreso_datos, text="Categoria",style="CustomSmall.TLabel")
-        self.lb_categoria.grid(row=0, column=2)
-        self.entry_categoria= ttk.Combobox(self.ingreso_datos, textvariable=self.var_categoria)
-        self.entry_categoria.grid(row=1, column=2,sticky="nsew")
-        
-        self.entry_categoria["values"] = ["Tienda", "Almacen"]
-        
         self.expandir_widget(self.ingreso_datos, colum=3, row=3)
         self.ingreso_datos.grid(row=1, column=0,sticky="nsew",pady=20)
         
@@ -208,24 +202,33 @@ class WinAdmin(ttk.Frame):
         
         
         self.lb_cantidad_decrip_producto = ttk.Label(self.frame_descrip_producto, text="Cantidad",style="CustomSmall.TLabel", width=20)
-        self.lb_cantidad_decrip_producto.grid(row=0,column=4,sticky="nsew")
+        self.lb_cantidad_decrip_producto.grid(row=2,column=1,sticky="nsew")
         self.entry_cantidad_decrip_producto = ttk.Entry(self.frame_descrip_producto, textvariable=self.var_descrip_cantidad,width=20, validate="key", validatecommand=vc)
-        self.entry_cantidad_decrip_producto.grid(row=1,column=4,sticky="nsew")
+        self.entry_cantidad_decrip_producto.grid(row=3,column=1,sticky="nsew")
         
-        self.lb_cantidad_inventario = ttk.Label(self.frame_descrip_producto, text="Cant. Inventario",style="CustomSmall.TLabel", width=20).grid(row=0,column=5,sticky="nsew")
+        self.lb_cantidad_inventario = ttk.Label(self.frame_descrip_producto, text="Cant. Inventario",style="CustomSmall.TLabel", width=20).grid(row=2,column=2,sticky="nsew")
         self.cantidad_inventario = ttk.Label(self.frame_descrip_producto, textvariable=self.var_cantidad_inventario, width=20)
-        self.cantidad_inventario.grid(row=1,column=5,sticky="nsew")
+        self.cantidad_inventario.grid(row=3,column=2,sticky="nsew")
+        
+        self.lb_categoria = ttk.Label(self.frame_descrip_producto, text="Categoria",style="CustomSmall.TLabel")
+        self.lb_categoria.grid(row=2, column=3)
+        self.entry_categoria= ttk.Combobox(
+            self.frame_descrip_producto, 
+            textvariable=self.var_categoria,
+            state= "readonly")
+        self.entry_categoria.grid(row=3, column=3,sticky="ew")
+        self.entry_categoria["values"] = Cat.categorias
+        self.entry_categoria.set(Cat.tienda)
         
         self.cambiar_widget()
         self.frame_descrip_producto.grid(row=2, column=0,sticky="nsew")
-        self.expandir_widget(self.frame_descrip_producto, colum=5)
-        
+        self.expandir_widget(self.frame_descrip_producto, colum=4, row=4)
         # Frame lista de productos
         self.frame_lista_producto = ttk.Frame(self)
-        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad])
+        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad,Producto.categoria])
         self.frame_lista_producto.grid(row=4, column=0, sticky="nsew")
         self.win_lista_producto.bind("<BackSpace>", self.eliminar_producto_auto)
-        
+        self.expandir_widget(self.frame_lista_producto,row=1, colum=1)
         # Frame Botones
         self.frame_botones = ttk.Frame(self)
         self.img_mod = utl.leer_imagen("./Imagenes/BTN_Modificar.png", (24,24))
@@ -252,8 +255,8 @@ class WinAdmin(ttk.Frame):
         
         ## Configurar el frame principal del operario
         self.rowconfigure(4, weight=3)
-        self.columnconfigure(1, weight=3)
-        self.columnconfigure(0, weight=0)
+        self.columnconfigure(1, weight=4)
+        self.columnconfigure(0, weight=1)
         
         # guardar foco del frame
         self.entry_codigo.bind("<FocusIn>", self.controlador_de_foco)
@@ -376,22 +379,18 @@ class WinAdmin(ttk.Frame):
         if self.foco_frame == self.entry_codigo or self.foco_frame == self.entry_nombre_producto:
             try:
                 if self.foco_frame == self.entry_codigo:
-                    producto = BD.buscar_producto_cod(self.var_buscar_cod.get())   
-                    self.var_descrip_cod.set(producto[ProductoDB.codigo])
-                    self.var_descrip_nombre.set(producto[ProductoDB.nombre])
-                    self.var_descrip_precio.set(producto[ProductoDB.precio])
-                    self.var_descrip_precio_entra.set(producto[ProductoDB.precio_entrada])
-                    self.var_descrip_cantidad.set(1)
-                    self.var_cantidad_inventario.set(producto[ProductoDB.cantidad])
+                    producto = BD.buscar_producto_cod(self.var_buscar_cod.get()) 
                     
                 elif self.foco_frame == self.entry_nombre_producto:
                     producto = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
-                    self.var_descrip_cod.set(producto[ProductoDB.codigo])
-                    self.var_descrip_nombre.set(producto[ProductoDB.nombre])
-                    self.var_descrip_precio.set(producto[ProductoDB.precio])
-                    self.var_descrip_precio_entra.set(producto[ProductoDB.precio_entrada])
-                    self.var_descrip_cantidad.set(1)
-                    self.var_cantidad_inventario.set(producto[ProductoDB.cantidad])
+                
+                self.var_descrip_cod.set(producto[ProductoDB.codigo])
+                self.var_descrip_nombre.set(producto[ProductoDB.nombre])
+                self.var_descrip_precio.set(producto[ProductoDB.precio])
+                self.var_descrip_precio_entra.set(producto[ProductoDB.precio_entrada])
+                self.var_descrip_cantidad.set(1)
+                self.var_cantidad_inventario.set(producto[ProductoDB.cantidad])
+                self.var_categoria.set(producto[ProductoDB.categoria])
                         
             except  ExcepBus as e:  
                 respuesta=messagebox.askokcancel("LMH SOLUTIONS", "Codigo o Nombre no encontrado. ¿Desea agregar uno?")
@@ -525,7 +524,8 @@ class WinAdmin(ttk.Frame):
         self.var_descrip_cod.set(valores[0])
         self.var_descrip_precio.set(valores[2])
         self.var_descrip_precio_entra.set(valores[3])
-        self.var_descrip_cantidad.set(valores[4]) 
+        self.var_descrip_cantidad.set(valores[4])
+        self.var_categoria.set(valores[5])
         
     def retornar_valores_producto(self):
         return {
@@ -533,7 +533,8 @@ class WinAdmin(ttk.Frame):
             Producto.nombre: [self.var_descrip_nombre.get().title()],
             Producto.precio: [self.var_descrip_precio.get()],
             Producto.precio_entrada: [self.var_descrip_precio_entra.get()],
-            Producto.cantidad: [self.var_descrip_cantidad.get()]
+            Producto.cantidad: [self.var_descrip_cantidad.get()],
+            Producto.categoria: [self.var_categoria.get()]
         }
     
     # Se actualiza el precio total de entrada y salida que hay en los produstos del list

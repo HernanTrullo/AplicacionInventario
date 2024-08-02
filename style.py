@@ -41,6 +41,10 @@ class StyleAPP:
                 background= bg_gen,
                 arrowcolor="white")
         
+        self.style.configure(
+                "TProgressbar",
+                background= bg_gen)
+        
         ## Estilos para los label general
         self.style.configure("CustomMedium.TLabel", foreground=cl_letter, background=bg_lb_gen, font=("Roboto", 15))
         self.style.configure("CustomSmall.TLabel", foreground=cl_letter, background=bg_lb_gen,font=("Roboto", 13))

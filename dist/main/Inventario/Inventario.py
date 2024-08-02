@@ -6,6 +6,8 @@ from tkinter import messagebox
 import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
+from BaseDatos.InventarioBD import ProductoDB
+from BaseDatos.InventarioBD import Categorias
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 import datetime
@@ -23,9 +25,10 @@ class WinInventario(ttk.Frame):
         
         self.var_total = tk.StringVar()
         self.var_total_vendido = tk.StringVar()
-        self.var_delta_time = tk.IntVar()
+
         self.var_buscar_nombre = tk.StringVar()
         self.var_buscar_cod = tk.StringVar()
+        self.var_categoria = tk.StringVar()
         
         self.foco_frame = None
         
@@ -50,11 +53,6 @@ class WinInventario(ttk.Frame):
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora, style="CCustomSmall.TLabel")
         self.hora.grid(row=2, column=1)
         
-        self.lb_hora = ttk.Label(self.top_frame, text="Dias de Licencia Restantes: ", style="CCustomLarge.TLabel")
-        self.lb_hora.grid(row=2, column=2)
-        self.hora = ttk.Label(self.top_frame, textvariable=self.var_delta_time, style="CCustomLarge.TLabel")
-        self.hora.grid(row=2, column=3)
-        
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
         # Agregar fecha y hora
@@ -78,7 +76,7 @@ class WinInventario(ttk.Frame):
         
         # Bóton para cargar los datos al inventario, salir y log out
         self.frame_inventario = ttk.Frame(self)
-        self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Actualizar", command=self.cargar_inventario,style="Primary.TButton")
+        self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Actualizar", command=self.cargar_productos_totales,style="Primary.TButton")
         self.btn_cargar_inventario.grid(row=0,column=0, sticky="nsew")
         self.btn_salir  = ttk.Button(self.frame_inventario, text="Salir",command=self.salir, style="Primary.TButton")
         self.btn_salir.grid(row=2, column=0,sticky="nsew")
@@ -103,14 +101,26 @@ class WinInventario(ttk.Frame):
         self.entry_codigo = ttk.Entry(self.ingreso_datos, textvariable=self.var_buscar_cod,style="Custom.TEntry")
         self.entry_codigo.grid(row=1, column=0,sticky="nsew")
         
+        self.lb_categoria = ttk.Label(self.ingreso_datos, text="Categoría", style="CustomSmall.TLabel")
+        self.lb_categoria.grid(row=0, column=2)
+        
+        self.cbox_categoria = ttk.Combobox(
+            self.ingreso_datos, 
+            textvariable=self.var_categoria,
+            state="readonly",
+            values=Categorias.categorias)
+        self.cbox_categoria.set(Categorias.tienda)
+        self.cbox_categoria.grid(row=1, column=2,sticky="nsew")
+        self.cbox_categoria.bind("<<ComboboxSelected>>", self.cargar_inventario_por_categoria)
+        
         self.ingreso_datos.grid(row=1, column=0, sticky="nsew")
         self.expandir_widget(self.ingreso_datos, colum=3)
         
         # Frame lista de productos
         self.frame_lista_producto = ttk.Frame(self)
-        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad])
+        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad, Producto.categoria])
         self.frame_lista_producto.grid(row=2, column=0, sticky="nsew")
-        
+        self.expandir_widget(self.frame_lista_producto,row=1, colum=1)
         # Agregar le evento de seleción
         self.win_lista_producto.bind("<<TreeviewSelect>>", self.set_sub_total)
         
@@ -145,11 +155,12 @@ class WinInventario(ttk.Frame):
                 self.win_lista_producto.vaciar_productos()
                 self.win_lista_producto.agregar_producto(
                 self.retornar_valores_producto(prod))
-            
-            
                 
-        except:
-            messagebox.showinfo("LMH SOLUTIONS", "Producto no encontrado")
+        except ExcepBus as e:
+            messagebox.showinfo("LMH SOLUTIONS", e)
+            
+        except :
+            messagebox.showerror("LMH SOLUTIONS", "Algo ha ocurrido con la aplicación, comuníquese con soporte")
         
         self.vaciar_widget()
     
@@ -171,14 +182,14 @@ class WinInventario(ttk.Frame):
         selected_item = self.win_lista_producto.selection()
         for s_item in selected_item:
             producto = self.win_lista_producto.item(s_item, "values")
-            valor_t += int(producto[5])
+            valor_t += int(producto[6])
         
         self.set_valor_total(valor_t)
     
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
-        self.after(1000, self.actualizar_hora)
+        self.after_id = self.after(1000, self.actualizar_hora)
         
     def salir(self):
         self.app.on_close()
@@ -192,15 +203,38 @@ class WinInventario(ttk.Frame):
             self.root.tab(notebok_tabs[0], state="normal")
             self.root.select(notebok_tabs[0])
             
-    def cargar_inventario(self):
-        productos = BD.obtener_productos()
-        self.win_lista_producto.vaciar_productos()
-        for producto in productos:
-            self.win_lista_producto.agregar_producto(self.retornar_valores_producto(producto))
-
-        self.set_valor_total(self.win_lista_producto.calcular_precio_productos_entrada())
-        self.set_valor_total_vendido(self.win_lista_producto.calcular_precio_productos_vendido())
-        
+    def cargar_inventario(self,categoria = Categorias.tienda):
+        try:
+            productos = BD.obtener_productos(categoria=categoria)
+            self.win_lista_producto.vaciar_productos()
+            productos_data = []
+            for producto in productos:
+                productos_data.append(self.retornar_valores_producto(producto))
+                
+            self.win_lista_producto.agregar_productos_en_bloque(productos_data)
+            self.set_valor_total(self.win_lista_producto.calcular_precio_productos_entrada())
+            self.set_valor_total_vendido(self.win_lista_producto.calcular_precio_productos_vendido())
+        except:
+            self.set_valor_total(0)
+            self.set_valor_total_vendido(0)
+            messagebox.showinfo("LMH SOLUTIONS", "No productos la referencia de la categoria")
+    
+    def cargar_productos_totales(self):
+        try:
+            productos = BD.obtener_productos_totales()
+            self.win_lista_producto.vaciar_productos()
+            productos_data = []
+            for producto in productos:
+                productos_data.append(self.retornar_valores_producto(producto))
+                
+            self.win_lista_producto.agregar_productos_en_bloque(productos_data)
+            self.set_valor_total(self.win_lista_producto.calcular_precio_productos_entrada())
+            self.set_valor_total_vendido(self.win_lista_producto.calcular_precio_productos_vendido())
+        except:
+            self.set_valor_total(0)
+            self.set_valor_total_vendido(0)
+            messagebox.showinfo("LMH SOLUTIONS", "No productos la referencia de la categoria")
+    
     def set_valor_total(self, valor):
         self.var_total.set(valor)
         self.total.formatear_valor()
@@ -211,13 +245,16 @@ class WinInventario(ttk.Frame):
     
     def retornar_valores_producto(self, producto):
         return {
-            Producto.codigo: [producto[0]],
-            Producto.nombre: [producto[1]],
-            Producto.precio: [producto[2]],
-            Producto.precio_entrada: [producto[3]],
-            Producto.cantidad: [producto[4]]
+            Producto.codigo: [producto[ProductoDB.codigo]],
+            Producto.nombre: [producto[ProductoDB.nombre]],
+            Producto.precio: [producto[ProductoDB.precio]],
+            Producto.precio_entrada: [producto[ProductoDB.precio_entrada]],
+            Producto.cantidad: [producto[ProductoDB.cantidad]],
+            Producto.categoria: [producto[Producto.categoria]]
         }
         
+    def cargar_inventario_por_categoria(self, event):
+        self.cargar_inventario(self.cbox_categoria.get())
         
     def doble_click_producto_modificar(self, values):
         pass

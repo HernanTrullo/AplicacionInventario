@@ -13,6 +13,7 @@ import datetime
 import utilidades.generc as utl
 from tktooltip import ToolTip
 from tkinter import simpledialog
+from TopLevels.WinInformeSocios import TopLevelInformeSocios as WinInformeSocios
 
 class WinSocios(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -27,7 +28,7 @@ class WinSocios(ttk.Frame):
         
         self.var_total = tk.StringVar()
         self.var_total_vendido = tk.StringVar()
-        self.var_delta_time = tk.IntVar()
+
         self.var_buscar_cod = tk.StringVar()
         self.var_buscar_nombre = tk.StringVar()
         
@@ -57,11 +58,6 @@ class WinSocios(ttk.Frame):
         self.lb_hora.grid(row=2, column=0)
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora, style="CCustomSmall.TLabel")
         self.hora.grid(row=2, column=1)
-        
-        self.lb_hora = ttk.Label(self.top_frame, text="Dias de Licencia Restantes: ", style="CCustomLarge.TLabel")
-        self.lb_hora.grid(row=2, column=2)
-        self.hora = ttk.Label(self.top_frame, textvariable=self.var_delta_time, style="CCustomLarge.TLabel")
-        self.hora.grid(row=2, column=3)
         
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
@@ -145,7 +141,10 @@ class WinSocios(ttk.Frame):
         self.btn_quitar_abono.grid(row=1, column=1,sticky="nsew")
         
         self.btn_mostrar_todos  = ttk.Button(self.frame_inventario, text="Obtener Usuarios",command=self.mostrar_users, style="Primary.TButton")
-        self.btn_mostrar_todos.grid(row=2, column=0,sticky="nsew",columnspan=2)
+        self.btn_mostrar_todos.grid(row=2, column=0,sticky="nsew")
+        self.btn_mostrar_todos  = ttk.Button(self.frame_inventario, text="Informe Usuario",command=self.obtener_informe_usuarios, style="Primary.TButton")
+        self.btn_mostrar_todos.grid(row=2, column=1,sticky="nsew")
+        
         self.btn_log_out  = ttk.Button(self.frame_inventario, text="Cerrar Sesión",command=self.log_out, style="Primary.TButton")
         self.btn_log_out.grid(row=3, column=0,sticky="nsew")
         
@@ -172,16 +171,18 @@ class WinSocios(ttk.Frame):
     def quitar_abono(self):
         abono = simpledialog.askinteger("LMH SOLUTIONS","Ingrese un valor para quitar abono", initialvalue=0)
         if(abono>0):
-            self.win_lista_socio.abonar_cartera(-abono)
-        else:
-            messagebox.showwarning("LMH SOLUTIONS","El valor debe ser positivo")   
+            if (abono>0):
+                self.win_lista_socio.abonar_cartera(-abono)
+            else:
+                messagebox.showwarning("LMH SOLUTIONS","El valor debe ser positivo")   
     
     def abonar(self):
         abono = simpledialog.askinteger("LMH SOLUTIONS","Ingrese un valor para abonar", initialvalue=0)
-        if(abono>0):
-            self.win_lista_socio.abonar_cartera(abono)
-        else:
-            messagebox.showwarning("LMH SOLUTIONS","El valor debe ser positivo")
+        if(abono):
+            if(abono>0):
+                self.win_lista_socio.abonar_cartera(abono)
+            else:
+                messagebox.showwarning("LMH SOLUTIONS","El valor debe ser positivo")
     
     def log_out(self):
         for tab in self.root.tabs():
@@ -203,6 +204,7 @@ class WinSocios(ttk.Frame):
         self.app.on_close()
     
     def agregar_socio(self, bandera_cod, dato):
+        self.win_lista_socio.vaciar_productos()
         self.win_lista_socio.agregar_usuario(self.return_socio_dict(self.pedir_datos(bandera_cod, dato)))
         self.limpiar_variables_busqueda()
     
@@ -250,6 +252,9 @@ class WinSocios(ttk.Frame):
                         self.agregar_socio(False,self.var_buscar_nombre.get())
                     
             self.limpiar_variables_busqueda()
+            
+    def obtener_informe_usuarios(self):
+        self.win_informe_socios = WinInformeSocios(self)
     
     def cambiar_widget(self, comand=0):
         if comand==0:

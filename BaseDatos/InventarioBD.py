@@ -10,7 +10,17 @@ class ProductoDB:
     precio = "Precio"
     precio_entrada = "Precio_Entrada"
     cantidad = "Cantidad"
-    
+    categoria = "Categoria"
+
+class Categorias:
+    tienda= "Tienda"
+    almacen = "Almacen"
+    ferreteria = "Ferreterria"
+    papeleriaEscolar = "Papeleria y Escolar"
+    dulceria = "Dulceria"
+    concentradoProductosVet = "Concentrado y Productos Vet"
+    farmacia = "Farmacia"
+    categorias = ["Tienda","Almacen", "Ferreterria","Papeleria y Escolar","Dulceria","Concentrado y Productos Vet", "Farmacia"]
 
 
 class BD_Inventario():
@@ -50,8 +60,31 @@ class BD_Inventario():
         return hay_producto
     
     @classmethod
-    def obtener_productos(cls):
-        str = f"SELECT * FROM Inventario ORDER BY {ProductoDB.codigo}"
+    def obtener_productos(cls, categoria = Categorias.tienda):
+        str = f"""SELECT * 
+                    FROM Inventario
+                    WHERE {ProductoDB.categoria} = '{categoria}'
+                    ORDER BY {ProductoDB.cantidad} ASC"""
+                    
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        res = cur.execute(str)
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res) >0:
+            lista_producto = []
+            for producto in res:
+                lista_producto.append(cls.formaterProducto(producto))
+            return lista_producto
+        else:
+            raise ExcepBus("No se encuentran productos")
+    
+    @classmethod
+    def obtener_productos_totales(cls):
+        str = f"""SELECT * 
+                    FROM Inventario
+                    ORDER BY {ProductoDB.cantidad} ASC"""
                     
         conn = sqlite3.connect(cls.name_bd)
         cur = conn.cursor()
@@ -71,8 +104,8 @@ class BD_Inventario():
     def agregar_productos(cls,productos):
         try:
             str = f"""INSERT INTO Inventario
-            ({ProductoDB.codigo},{ProductoDB.nombre},{ProductoDB.precio},{ProductoDB.precio_entrada},{ProductoDB.cantidad}) 
-            VALUES (?,?,?,?,?)"""
+            ({ProductoDB.codigo},{ProductoDB.nombre},{ProductoDB.precio},{ProductoDB.precio_entrada},{ProductoDB.cantidad},{ProductoDB.categoria}) 
+            VALUES (?,?,?,?,?,?)"""
             
             conn = sqlite3.connect(cls.name_bd)
             cur = conn.cursor()
@@ -96,7 +129,7 @@ class BD_Inventario():
         
         if len(res) >0:
             return cls.formaterProducto(res[0])
-            #res[0] # (cod, nombre, precio, precio_compra, cantidad)
+            #res[0] # (cod, nombre, precio, precio_compra, cantidad, categoria)
         else:
             raise ExcepBus("Producto no encontrado")
     
@@ -135,7 +168,7 @@ class BD_Inventario():
     @classmethod
     def modificar_producto(cls, producto):
         str = f""" UPDATE Inventario
-                    SET {ProductoDB.precio} = {producto[2]}, {ProductoDB.precio_entrada}={producto[3]},{ProductoDB.cantidad} = {producto[4]} 
+                    SET {ProductoDB.precio} = {producto[2]}, {ProductoDB.precio_entrada}={producto[3]},{ProductoDB.cantidad} = {producto[4]}, {ProductoDB.categoria} = '{producto[5]}' 
                     WHERE {ProductoDB.codigo} = '{producto[0]}'"""
         conn = sqlite3.connect(cls.name_bd)           
         cur = conn.cursor()
@@ -163,11 +196,11 @@ class BD_Inventario():
         for index,row in df.iterrows():
             try:
                 producto = cls.buscar_producto_cod(row[ProductoDB.codigo])
-                p_actualizado = [producto[ProductoDB.codigo], producto[ProductoDB.nombre], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad]+producto[ProductoDB.cantidad]]
+                p_actualizado = [producto[ProductoDB.codigo], producto[ProductoDB.nombre], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad]+producto[ProductoDB.cantidad], row[ProductoDB.categoria]]
                 cls.modificar_producto(p_actualizado)
             except ExcepBus as e:
                 producto = [
-                    (row[ProductoDB.codigo], row[ProductoDB.nombre], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad])
+                    (row[ProductoDB.codigo], row[ProductoDB.nombre], row[ProductoDB.precio], row[ProductoDB.precio_entrada], row[ProductoDB.cantidad], row[ProductoDB.categoria])
                 ]
                 cls.agregar_productos(producto)
             
@@ -246,6 +279,7 @@ class BD_Inventario():
             ProductoDB.nombre: producto[1],
             ProductoDB.precio: producto[2],
             ProductoDB.precio_entrada: producto[3],
-            ProductoDB.cantidad: producto[4]
+            ProductoDB.cantidad: producto[4],
+            ProductoDB.categoria: producto[5]
         }
     

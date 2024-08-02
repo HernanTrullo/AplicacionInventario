@@ -84,10 +84,13 @@ class WinLogeo(ttk.Frame):
                 
             else:
                 notebok_tabs= self.root.tabs()
-                self.root.tab(notebok_tabs[5], state="normal") # Afiliados
-                self.root.tab(notebok_tabs[4], state="normal") # Inventario
                 self.root.tab(notebok_tabs[1], state="normal") #Operario
+                self.root.tab(notebok_tabs[5], state="normal") # Afiliados
+                self.root.tab(notebok_tabs[2], state="normal") # Admin
+                self.root.tab(notebok_tabs[4], state="hidden") # Inventario
                 self.root.tab(notebok_tabs[0], state="hidden") #Logeo
+                
+                
                 
                 self.root.select(notebok_tabs[1])
                 # Se setea el nombre del operario

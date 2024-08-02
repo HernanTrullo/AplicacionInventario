@@ -1,6 +1,6 @@
 import win32print
 import datetime
-
+import win32ui
 
 class Printer():
     def __init__(self) -> None:
@@ -29,7 +29,7 @@ class Printer():
         
     def imprimir_cabecera(self):
         ## Se construye la cabecera
-        output_string = f"""|   Auto Servicio Pedregal    |\n""".encode('utf-8')
+        output_string = f"""|          Surti Hogar        |\n""".encode('utf-8')
         # Enviar datos a la impresora
         win32print.WritePrinter(self.hPrinter, output_string)
         
@@ -79,7 +79,8 @@ class Printer():
         
         for i in range(3):
             self.imprimir_salto_de_linea()
-            
+        
+    def abrir_caja_cerrar_printer(self):
+        win32print.WritePrinter(self.hPrinter, b'\x1B\x70\x00\x19\xFA')
+        win32print.EndPagePrinter(self.hPrinter)
         win32print.EndDocPrinter(self.hPrinter)
-        
-        

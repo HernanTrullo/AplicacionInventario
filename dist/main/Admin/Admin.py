@@ -6,7 +6,9 @@ from tkinter import messagebox
 import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
+from BaseDatos.InventarioBD import ProductoDB
 from BaseDatos.control_bd_variables import BD_Variables
+from BaseDatos.InventarioBD import Categorias as Cat
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 import datetime
@@ -14,6 +16,10 @@ import utilidades.generc as utl
 from tktooltip import ToolTip
 from tkinter import simpledialog
 from BaseDatos.control_bd_variables import BD_Variables as BD_Var
+from utilidades.Printer import Printer
+from TopLevels.WinCierreCaja import TopLevelWinCierreCaja as WinCaja
+from TopLevels.WinInformeVentas import TopLevelInformeVentas as WinVentasInforme
+from TopLevels.WinInformeProductos import TopLevelInformeProductos as WinProductoInforme
 
 class WinAdmin(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -34,12 +40,13 @@ class WinAdmin(ttk.Frame):
         
         self.var_buscar_nombre = tk.StringVar()
         self.var_buscar_cod = tk.StringVar()
+        self.var_categoria = tk.StringVar()
         
         self.var_total = tk.StringVar()
         self.var_total_vendido = tk.StringVar()
         self.var_valor_ventido_op = IntVar()
         
-        self.var_delta_time = tk.IntVar()
+        self.var_saldo_caja = tk.IntVar()
         self.value_ocultar =True
         
         self.foco_frame = None
@@ -52,11 +59,13 @@ class WinAdmin(ttk.Frame):
         
         # Inicializar variables
         self.actualizar_valor_vendido(BD_Variables.get_valor_ventas_turno())
+        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
         
         self.bind("<FocusIn>", self.actualizar)
     
     def actualizar(self, event):
         self.actualizar_valor_vendido(BD_Variables.get_valor_ventas_turno())
+        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
         
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
@@ -77,10 +86,10 @@ class WinAdmin(ttk.Frame):
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora, style="CCustomSmall.TLabel")
         self.hora.grid(row=2, column=1)
         
-        self.lb_hora = ttk.Label(self.top_frame, text="Dias de Licencia Restantes: ", style="CCustomLarge.TLabel")
-        self.lb_hora.grid(row=2, column=2)
-        self.hora = ttk.Label(self.top_frame, textvariable=self.var_delta_time, style="CCustomLarge.TLabel")
-        self.hora.grid(row=2, column=3)
+        self.lb_saldo_caja = ttk.Label(self.top_frame, text="Saldo Caja ", style="CCustomLarge.TLabel")
+        self.lb_saldo_caja.grid(row=2, column=2)
+        self.saldo_caja = LabelP(self.top_frame, textvariable=self.var_saldo_caja, style="CCustomLarge.TLabel")
+        self.saldo_caja.grid(row=2, column=3)
         
         self.lb_valor_vendido_op =  ttk.Label(self.top_frame, text="Valor Vendido: ", style="CCustomMedium.TLabel")
         self.lb_valor_vendido_op.grid(row=0, column=2, padx=10)
@@ -109,25 +118,45 @@ class WinAdmin(ttk.Frame):
         self.expandir_widget(self.frame_top_cuenta)
         
         # Bóton para cargar los datos al inventario, salir y log out y cambio de clave
-        self.frame_inventario = ttk.Frame(self)
+        self.frame_inventario = ttk.Notebook(self)
+        self.frame1_usuario = ttk.Frame(self.frame_inventario)
+        self.frame2_operaciones = ttk.Frame(self.frame_inventario)
+        self.frame3_caja = ttk.Frame(self.frame_inventario)
+        self.frame4_ventas_inventario = ttk.Frame(self.frame_inventario)
         
-        self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Cargar al inventario", command=self.cargar_inventario,style="Primary.TButton")
-        self.btn_cargar_inventario.grid(row=0,column=0, sticky="nsew")
+        self.frame_inventario.add(self.frame2_operaciones, text="Operaciones")
+        self.frame_inventario.add(self.frame1_usuario, text="Usuario")
+        self.frame_inventario.add(self.frame3_caja, text= "Caja")
+        self.frame_inventario.add(self.frame4_ventas_inventario, text="Ventas e Inventario")
         
-        self.btn_salir  = ttk.Button(self.frame_inventario, text="Salir",command=self.salir, style="Primary.TButton")
-        self.btn_salir.grid(row=1, column=0,sticky="nsew")
+        self.btn_cargar_inventario = ttk.Button(self.frame2_operaciones, text="Cargar al inventario", command=self.cargar_inventario,style="Primary.TButton")
+        self.btn_cargar_inventario.grid(row=0,column=0,sticky="nsew")
+        self.btn_devolver_producto = ttk.Button(self.frame2_operaciones, text="Devolver Producto", command=self.devolver_valor_vendido, style="Primary.TButton")
+        self.btn_devolver_producto.grid(row=1, column=0,sticky="nsew")
         
-        self.btn_log_out  = ttk.Button(self.frame_inventario, text="Corte de Inventario",command=self.log_out, style="Primary.TButton")
-        self.btn_log_out.grid(row=3, column=0,sticky="nsew")
+        self.btn_cierre_caja  = ttk.Button(self.frame3_caja, text="Informe de Caja",command=self.cierre_de_caja_infome, style="Primary.TButton")
+        self.btn_cierre_caja.grid(row=0, column=0,sticky="nsew")
+        self.btn_asignar_saldo_caja = ttk.Button(self.frame3_caja, text="Asignar Saldo Caja", command=self.asignar_saldo_caja, style="Primary.TButton")
+        self.btn_asignar_saldo_caja.grid(row=1, column=0, sticky="nsew")
         
-        self.btn_cambiar_clave  = ttk.Button(self.frame_inventario, text="Cambiar Clave",command=self.cambiar_clave, style="Primary.TButton")
-        self.btn_cambiar_clave.grid(row=2, column=0,sticky="nsew")
-        self.btn_devolver_producto = ttk.Button(self.frame_inventario, text="Devolver Producto", command=self.devolver_valor_vendido, style="Primary.TButton")
-        self.btn_devolver_producto.grid(row=3, column=0,sticky="nsew")
+        self.btn_salir  = ttk.Button(self.frame1_usuario, text="Salir",command=self.salir, style="Primary.TButton")
+        self.btn_salir.grid(row=0, column=0,sticky="nsew")
+        self.btn_cambiar_clave  = ttk.Button(self.frame1_usuario, text="Cambiar Clave",command=self.cambiar_clave, style="Primary.TButton")
+        self.btn_cambiar_clave.grid(row=1, column=0,sticky="nsew")
+        
+        self.btn_informe_ventas = ttk.Button(self.frame4_ventas_inventario, text="Informe Ventas",command=self.generar_informe_ventas, style="Primary.TButton")
+        self.btn_informe_ventas.grid(row=0, column=0, sticky="nsew")
+        self.btn_informe_inventario = ttk.Button(self.frame4_ventas_inventario, text="Informe Inventario",command=self.generar_informe_inventario, style="Primary.TButton")
+        self.btn_informe_inventario.grid(row=1, column=0, sticky="nsew")
         
         
-        self.expandir_widget(self.frame_inventario, row=4, colum=1)
-        self.frame_inventario.grid(row=3, column=1, rowspan=2, sticky="nsew")
+        self.expandir_widget(self.frame_inventario, row=0, colum=0)
+        self.expandir_widget(self.frame1_usuario, row=2, colum=1)
+        self.expandir_widget(self.frame2_operaciones, row=2, colum=1)
+        self.expandir_widget(self.frame3_caja, row=2, colum=1)
+        self.expandir_widget(self.frame4_ventas_inventario, row=2, colum=1)
+        
+        self.frame_inventario.grid(row=3, column=1, rowspan=2,columnspan=2, sticky="nsew")
         
         
         # Frame del buscar de datos
@@ -144,7 +173,7 @@ class WinAdmin(ttk.Frame):
         self.entry_nombre_producto.grid(row=1, column=1,sticky="nsew")
         self.entry_nombre_producto.bind("<KeyRelease>", self.actualizar_nombre_productos)
         
-        self.expandir_widget(self.ingreso_datos, colum=3)
+        self.expandir_widget(self.ingreso_datos, colum=3, row=3)
         self.ingreso_datos.grid(row=1, column=0,sticky="nsew",pady=20)
         
         # Frame descripción del producto (Compra)
@@ -173,24 +202,33 @@ class WinAdmin(ttk.Frame):
         
         
         self.lb_cantidad_decrip_producto = ttk.Label(self.frame_descrip_producto, text="Cantidad",style="CustomSmall.TLabel", width=20)
-        self.lb_cantidad_decrip_producto.grid(row=0,column=4,sticky="nsew")
+        self.lb_cantidad_decrip_producto.grid(row=2,column=1,sticky="nsew")
         self.entry_cantidad_decrip_producto = ttk.Entry(self.frame_descrip_producto, textvariable=self.var_descrip_cantidad,width=20, validate="key", validatecommand=vc)
-        self.entry_cantidad_decrip_producto.grid(row=1,column=4,sticky="nsew")
+        self.entry_cantidad_decrip_producto.grid(row=3,column=1,sticky="nsew")
         
-        self.lb_cantidad_inventario = ttk.Label(self.frame_descrip_producto, text="Cant. Inventario",style="CustomSmall.TLabel", width=20).grid(row=0,column=5,sticky="nsew")
+        self.lb_cantidad_inventario = ttk.Label(self.frame_descrip_producto, text="Cant. Inventario",style="CustomSmall.TLabel", width=20).grid(row=2,column=2,sticky="nsew")
         self.cantidad_inventario = ttk.Label(self.frame_descrip_producto, textvariable=self.var_cantidad_inventario, width=20)
-        self.cantidad_inventario.grid(row=1,column=5,sticky="nsew")
+        self.cantidad_inventario.grid(row=3,column=2,sticky="nsew")
+        
+        self.lb_categoria = ttk.Label(self.frame_descrip_producto, text="Categoria",style="CustomSmall.TLabel")
+        self.lb_categoria.grid(row=2, column=3)
+        self.entry_categoria= ttk.Combobox(
+            self.frame_descrip_producto, 
+            textvariable=self.var_categoria,
+            state= "readonly")
+        self.entry_categoria.grid(row=3, column=3,sticky="ew")
+        self.entry_categoria["values"] = Cat.categorias
+        self.entry_categoria.set(Cat.tienda)
         
         self.cambiar_widget()
         self.frame_descrip_producto.grid(row=2, column=0,sticky="nsew")
-        self.expandir_widget(self.frame_descrip_producto, colum=5)
-        
+        self.expandir_widget(self.frame_descrip_producto, colum=4, row=4)
         # Frame lista de productos
         self.frame_lista_producto = ttk.Frame(self)
-        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad])
+        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.precio_entrada,Producto.cantidad,Producto.categoria])
         self.frame_lista_producto.grid(row=4, column=0, sticky="nsew")
         self.win_lista_producto.bind("<BackSpace>", self.eliminar_producto_auto)
-        
+        self.expandir_widget(self.frame_lista_producto,row=1, colum=1)
         # Frame Botones
         self.frame_botones = ttk.Frame(self)
         self.img_mod = utl.leer_imagen("./Imagenes/BTN_Modificar.png", (24,24))
@@ -217,8 +255,8 @@ class WinAdmin(ttk.Frame):
         
         ## Configurar el frame principal del operario
         self.rowconfigure(4, weight=3)
-        self.columnconfigure(1, weight=3)
-        self.columnconfigure(0, weight=0)
+        self.columnconfigure(1, weight=4)
+        self.columnconfigure(0, weight=1)
         
         # guardar foco del frame
         self.entry_codigo.bind("<FocusIn>", self.controlador_de_foco)
@@ -235,6 +273,8 @@ class WinAdmin(ttk.Frame):
         # Comprobar nombre o codigo
         self.entry_cod_descrp_producto.bind("<FocusOut>",self.comprobar_codigo_producto)
         self.entry_nombre_descrp_producto.bind("<FocusOut>",self.comprobar_nombre_producto)
+        
+        
     
     def toggle_visibility(self):
         if self.value_ocultar:
@@ -276,7 +316,7 @@ class WinAdmin(ttk.Frame):
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
-        self.after(1000, self.actualizar_hora)
+        self.after_id = self.after(1000, self.actualizar_hora)
         
     def comprobar_nombre_producto(self, event):
         if (BD.esta_el_producto_nombre(self.var_descrip_nombre.get())):
@@ -285,7 +325,7 @@ class WinAdmin(ttk.Frame):
     
     def comprobar_codigo_producto(self, event):
         if (BD.esta_el_producto_cod(self.var_descrip_cod.get())):
-            messagebox.showwarning("LMH SOLUTIONS", "Código Duplicado Duplicado")
+            messagebox.showwarning("LMH SOLUTIONS", "Código Duplicado")
             event.widget.focus()
         
     def salir(self):
@@ -308,27 +348,20 @@ class WinAdmin(ttk.Frame):
             self.root.select(notebok_tabs[0])
             
             
-        
-    
-    def log_out(self):
-        resp = simpledialog.askstring("LMH SOLUTIONS", "     Digite la clave de admin     ")
-        if (resp == BD_Variables.get_clave_admin()):
-            if messagebox.askokcancel("Log Out", "¿Estás seguro de que quieres terminar sesión \nAdicionamente, resetear el valor del acumulado?"):
-                # Resetear el valor de las ventas temporales del dia por el operario
-                BD_Variables.reset_valor_ventas_turno()
-                self.actualizar_valor_vendido(0)
+    def asignar_saldo_caja(self):
+        resp = messagebox.askokcancel("LMH SOLUTIONS", "Va a asignar un saldo de caja,\n¿está seguro que desea hacerlo?")
+        if resp:
+            resp = simpledialog.askinteger("LMH SOLUTIONS", "Digite el saldo en caja con el que va a iniciar")
+            if resp:
+                self.actualizar_valor_saldo_caja(resp)
                 
-                notebok_tabs= self.root.tabs()
-                self.root.tab(notebok_tabs[5], state="hidden")
-                self.root.tab(notebok_tabs[4], state="hidden")
-                self.root.tab(notebok_tabs[2], state="hidden")
-                self.root.tab(notebok_tabs[1], state="hidden")
-                self.root.tab(notebok_tabs[0], state="normal")
-                self.root.select(notebok_tabs[0])
-                    
-        else:
-            messagebox.showwarning("LMH SOLUTIONS", "¡Tenga cuidado!, la clave debe ser de administrador")
-            
+                BD_Var.set_saldo_caja(self.var_saldo_caja.get())
+                messagebox.showinfo("LMH SOLUTIONS", "Saldo añadido correctamente")
+                
+
+    def cierre_de_caja_infome(self):
+        self.win_caja = WinCaja(self, BD_Var.get_saldo_caja(), BD_Var.get_valor_ventas_turno())
+    
     def actualizar_valor_vendido (self, value):
         self.var_valor_ventido_op.set(value)
         self.valor_vendido_op.formatear_valor()
@@ -346,22 +379,18 @@ class WinAdmin(ttk.Frame):
         if self.foco_frame == self.entry_codigo or self.foco_frame == self.entry_nombre_producto:
             try:
                 if self.foco_frame == self.entry_codigo:
-                    values = BD.buscar_producto_cod(self.var_buscar_cod.get())   
-                    self.var_descrip_cod.set(values[0])
-                    self.var_descrip_nombre.set(values[1])
-                    self.var_descrip_precio.set(values[2])
-                    self.var_descrip_precio_entra.set(values[3])
-                    self.var_descrip_cantidad.set(1)
-                    self.var_cantidad_inventario.set(values[4])
+                    producto = BD.buscar_producto_cod(self.var_buscar_cod.get()) 
                     
                 elif self.foco_frame == self.entry_nombre_producto:
-                    values = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
-                    self.var_descrip_cod.set(values[0])
-                    self.var_descrip_nombre.set(values[1])
-                    self.var_descrip_precio.set(values[2])
-                    self.var_descrip_precio_entra.set(values[3])
-                    self.var_descrip_cantidad.set(1)
-                    self.var_cantidad_inventario.set(values[4])
+                    producto = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
+                
+                self.var_descrip_cod.set(producto[ProductoDB.codigo])
+                self.var_descrip_nombre.set(producto[ProductoDB.nombre])
+                self.var_descrip_precio.set(producto[ProductoDB.precio])
+                self.var_descrip_precio_entra.set(producto[ProductoDB.precio_entrada])
+                self.var_descrip_cantidad.set(1)
+                self.var_cantidad_inventario.set(producto[ProductoDB.cantidad])
+                self.var_categoria.set(producto[ProductoDB.categoria])
                         
             except  ExcepBus as e:  
                 respuesta=messagebox.askokcancel("LMH SOLUTIONS", "Codigo o Nombre no encontrado. ¿Desea agregar uno?")
@@ -426,14 +455,18 @@ class WinAdmin(ttk.Frame):
                 self.cambiar_widget()
                 self.limpiar_variables()
                 messagebox.showinfo("LMH SOLUTIONS", "Producto modificado correctamente")
-                
                 self.bloquear_botones(False)
                 self.actualizar_precio_total()
                 self.entry_codigo.focus()
         else:
             messagebox.showwarning("LMH SOLUTIONS", "El precio de venta es menor que el de compra")
-                
     
+    ## La disposición del inventario y las ventas
+    def generar_informe_ventas(self):
+        self.winVentasInforme = WinVentasInforme(self)
+    
+    def generar_informe_inventario(self):
+        self.winProductoInforme = WinProductoInforme(self)
     
     def expandir_widget(self, frame:ttk.LabelFrame, row=2, colum=2):
         for i in range(row):
@@ -491,7 +524,8 @@ class WinAdmin(ttk.Frame):
         self.var_descrip_cod.set(valores[0])
         self.var_descrip_precio.set(valores[2])
         self.var_descrip_precio_entra.set(valores[3])
-        self.var_descrip_cantidad.set(valores[4]) 
+        self.var_descrip_cantidad.set(valores[4])
+        self.var_categoria.set(valores[5])
         
     def retornar_valores_producto(self):
         return {
@@ -499,7 +533,8 @@ class WinAdmin(ttk.Frame):
             Producto.nombre: [self.var_descrip_nombre.get().title()],
             Producto.precio: [self.var_descrip_precio.get()],
             Producto.precio_entrada: [self.var_descrip_precio_entra.get()],
-            Producto.cantidad: [self.var_descrip_cantidad.get()]
+            Producto.cantidad: [self.var_descrip_cantidad.get()],
+            Producto.categoria: [self.var_categoria.get()]
         }
     
     # Se actualiza el precio total de entrada y salida que hay en los produstos del list
@@ -509,4 +544,6 @@ class WinAdmin(ttk.Frame):
         self.out_total.formatear_valor() # Formato de peso
         self.out_total_vendido.formatear_valor() # Formato de peso
         
-            
+    def actualizar_valor_saldo_caja(self, value):
+        self.var_saldo_caja.set(value)
+        self.saldo_caja.formatear_valor()

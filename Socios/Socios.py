@@ -204,6 +204,7 @@ class WinSocios(ttk.Frame):
         self.app.on_close()
     
     def agregar_socio(self, bandera_cod, dato):
+        self.win_lista_socio.vaciar_productos()
         self.win_lista_socio.agregar_usuario(self.return_socio_dict(self.pedir_datos(bandera_cod, dato)))
         self.limpiar_variables_busqueda()
     

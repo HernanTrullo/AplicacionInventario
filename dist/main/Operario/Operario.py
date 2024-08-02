@@ -7,6 +7,7 @@ from tkinter import simpledialog
 import tkinter as tk
 from utilidades.ListaProducto import Producto, ListaProducto
 from BaseDatos.InventarioBD import BD_Inventario as BD
+from BaseDatos.InventarioBD import ProductoDB
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 from tkinter import simpledialog
@@ -15,6 +16,12 @@ import datetime
 from BaseDatos.control_bd_variables import BD_Variables as BD_Var
 from BaseDatos.control_bd_socios import BD_Socios as SOCIO
 from BaseDatos.control_bd_socios import UsuarioDB as SOCIO_US
+from BaseDatos.VentasBD import VentasSql
+from BaseDatos.VentasBD import VentaModel
+import TopLevels.controller as controller
+from utilidades.Infomes import Informe
+import random
+
 import numpy as np
 from utilidades.Printer import Printer as Impresora
 
@@ -42,11 +49,12 @@ class WinOperario(ttk.Frame):
         
         self.var_total = tk.IntVar()
         self.var_valor_ventido_op = IntVar()
+        self.var_valor_comprado_op_stock = IntVar()
         
         self.var_aporte_cliente = IntVar()
         self.var_saldo_cliente = IntVar()
         
-        self.var_delta_time = tk.IntVar()
+        self.var_saldo_caja = tk.IntVar()
         self.var_cedula_check = tk.StringVar()
         
         self.var_es_cartera = tk.BooleanVar()
@@ -64,6 +72,8 @@ class WinOperario(ttk.Frame):
         
     def actualizar(self, event):
         self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
+        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
+        
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
         self.top_frame = ttk.Frame(self, style="Cabecera.TFrame")
@@ -89,10 +99,10 @@ class WinOperario(ttk.Frame):
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora, style="CCustomSmall.TLabel")
         self.hora.grid(row=2, column=1)
         
-        self.lb_hora = ttk.Label(self.top_frame, text="Dias de Licencia Restantes: ", style="CCustomLarge.TLabel")
-        self.lb_hora.grid(row=2, column=2)
-        self.hora = ttk.Label(self.top_frame, textvariable=self.var_delta_time, style="CCustomLarge.TLabel")
-        self.hora.grid(row=2, column=3)
+        self.lb_saldo_caja = ttk.Label(self.top_frame, text="Saldo Caja ", style="CCustomLarge.TLabel")
+        self.lb_saldo_caja.grid(row=2, column=2)
+        self.saldo_caja = LabelP(self.top_frame, textvariable=self.var_saldo_caja, style="CCustomLarge.TLabel")
+        self.saldo_caja.grid(row=2, column=3)
         
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
@@ -154,22 +164,36 @@ class WinOperario(ttk.Frame):
         self.es_cartera = ttk.Checkbutton(self.frame_calculo_cuenta, variable=self.var_es_cartera)
         self.es_cartera.grid(row=3, column=1)
         
-        self.btn_vender  = ttk.Button(self.frame_calculo_cuenta, text="Vender",command=self.vender, style="Primary.TButton")
-        self.btn_vender.grid(row=4, column=0, columnspan=2, sticky="nsew")
+        self.notebook_buttons = ttk.Notebook(self.frame_calculo_cuenta)
+        self.notebook_buttons.grid(row=4, column=0, columnspan=2, sticky="nsew")
         
-        self.btn_salir  = ttk.Button(self.frame_calculo_cuenta, text="Salir",command=self.salir, style="Primary.TButton")
-        self.btn_salir.grid(row=5, column=0, columnspan=2,sticky="nsew")
+        self.frame1_ventas_caja = ttk.Frame(self.notebook_buttons)
+        self.frame2_opciones_user = ttk.Frame(self.notebook_buttons)
+        self.notebook_buttons.add(self.frame1_ventas_caja, text="Ventas y Caja")
+        self.notebook_buttons.add(self.frame2_opciones_user, text="Opciones de Usuario")
         
-        self.btn_log_out  = ttk.Button(self.frame_calculo_cuenta, text="Salir Cuenta",command=self.log_out, style="Primary.TButton")
-        self.btn_log_out.grid(row=6, column=0, columnspan=2,sticky="nsew")
+        self.btn_vender  = ttk.Button(self.frame1_ventas_caja, text="Vender",command=self.vender, style="Primary.TButton")
+        self.btn_vender.grid(row=0, column=0, sticky="nsew")
+        self.btn_vender  = ttk.Button(self.frame1_ventas_caja, text="Cerrar Caja",command=self.cerrar_caja, style="Primary.TButton")
+        self.btn_vender.grid(row=1, column=0, sticky="nsew")
         
-        self.expandir_widget(self.frame_calculo_cuenta, row=7, colum=2)
+        self.btn_salir  = ttk.Button(self.frame2_opciones_user, text="Salir",command=self.salir, style="Primary.TButton")
+        self.btn_salir.grid(row=0, column=0,sticky="nsew")
+        self.btn_log_out  = ttk.Button(self.frame2_opciones_user, text="Salir Cuenta",command=self.log_out, style="Primary.TButton")
+        self.btn_log_out.grid(row=1, column=0,sticky="nsew")
+        
+        self.expandir_widget(self.frame1_ventas_caja, row=2, colum=1)
+        self.expandir_widget(self.frame2_opciones_user, row=2, colum=1)
+        self.expandir_widget(self.frame_calculo_cuenta, row=3, colum=2)
+        
+        self.frame_calculo_cuenta.rowconfigure(4, weight=2)
         self.frame_calculo_cuenta.grid(row=2, column=1,sticky="nsew")
         
         # Frame lista de productos
         self.frame_lista_producto = ttk.Frame(self)
-        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.cantidad])
+        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.cantidad], 100)
         self.frame_lista_producto.grid(row=2, column=0, sticky="nsew")
+        self.expandir_widget(self.frame_lista_producto,row=1, colum=1)
         self.win_lista_producto.bind("<BackSpace>", self.eliminar_producto_auto)
         
         ## Configurar el frame principal del operario
@@ -188,6 +212,9 @@ class WinOperario(ttk.Frame):
         # Agregar fecha y hora
         self.var_fecha.set(datetime.date.today().strftime('%d/%m/%Y'))
         self.actualizar_hora()
+        
+        # Actualizar el saldo de caja
+        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
     
     def toggle_visibility(self):
         if self.value_ocultar:
@@ -217,8 +244,33 @@ class WinOperario(ttk.Frame):
     def actualizar_hora(self):
         hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
         self.var_hora.set(hora_actual)
-        self.after(1000, self.actualizar_hora)
+        self.after_id = self.after(1000, self.actualizar_hora)
         
+    def cerrar_caja(self):
+        if messagebox.askokcancel("Cierre de Caja", "¿Estás seguro de que quieres cerrar caja?\nAdicionamente, generar el informe del cierre de caja?"):
+            # Una funcion para imprimir un resumen del informes
+            try:
+                saldo_caja = BD_Var.get_saldo_caja() 
+                ventas_turno = BD_Var.get_valor_ventas_turno()
+                
+                fecha = datetime.datetime.now().strftime("%Y-%m-%d")
+                codigos_json = VentasSql.retornar_codigo_productos_vendidos(fecha)
+                resultado = controller.obtener_dict_codigo_cantidad(codigos_json)
+                
+                self.lista_nombres = []        
+                for codigo, cantidad in resultado.items():
+                    self.lista_nombres.append({"nombre":BD.buscar_producto_nombre_por_codigo(codigo),
+                                            "cantidad": cantidad})
+            except ExcepBus as e:
+                messagebox.showinfo("LMH SOLUTIOS", "No se han encontrado ventas en las fechas establecidas")
+            
+            Informe.generar_informe_caja(int(ventas_turno), int(saldo_caja), self.lista_nombres)
+    
+            #Resetear el valor de las ventas temporales del dia por el operario
+            self.actualizar_valor_vendido(0)
+            self.actualizar_valor_saldo_caja(0)
+            BD_Var.reset_valor_ventas_turno()
+    
     def vender(self):
         try:
             values_socio = list(SOCIO.buscar_socio_cedula(self.var_cedula_check.get()))
@@ -227,6 +279,9 @@ class WinOperario(ttk.Frame):
                 try:
                     productos_data_frame =  self.win_lista_producto.retornar_productos()
                     BD.sacar_productos(productos_data_frame) # Se sacan los productos de la bases de datos
+                    
+                    valor_comprado_stock =   BD.retornar_valor_compras_stock(productos_data_frame)
+                    
                     value_total_venta = int(BD_Var.get_valor_ventas_turno()) + self.var_total.get() # Valor total de ventas del turno
                     #Se actualizan las variables de afiliado
                     values_socio[3] = self.var_total.get() + values_socio[3]
@@ -243,26 +298,42 @@ class WinOperario(ttk.Frame):
                     
                     # Imprimir la tirilla
                     if (messagebox.askokcancel("LMH SOLUTIONS", "Desea imprimir el ticket?")):
-                        
-                        self.impresora.plotear_datos(self.dataFrame2listTuple(productos_data_frame ), self.var_total.get(), self.var_cedula_check.get())
+                        self.impresora.plotear_datos(self.dataFrame2listTuple(productos_data_frame), self.var_total.get(), self.var_cedula_check.get())
+                    
+                    self.impresora.abrir_caja_cerrar_printer()
+                    BD_Var.set_valor_ventas_turno(str(value_total_venta))
+                    self.actualizar_valor_vendido(value_total_venta)
+                    
+                    # Set del valor de compra de los articulos
+                    BD_Var.set_valor_comprado_stock(valor_comprado_stock + int(BD_Var.get_valor_comprado_stock()))
+                    # Enviar datos venta a la base de datos
+                
+                    lista_productos = []
+                    for index, row in productos_data_frame.iterrows():
+                        lista_productos.append({Producto.codigo: row[Producto.codigo]  ,Producto.cantidad: row[Producto.cantidad]})
+                    
+                    fecha_ac = datetime.datetime.now().strftime("""%Y-%m-%d""")
+                    tot_vendido = self.var_total.get()
+                    tot_comprado = valor_comprado_stock
+                
+                    venta = VentaModel(fecha=fecha_ac, total_vendido= tot_vendido, total_comprado= tot_comprado, productos_vendidos= utl.dictToJson(lista_productos))
+                    VentasSql.agregar_venta(venta)
                     
                     self.win_lista_producto.vaciar_productos()
                     self.var_es_cartera.set(False)
                     self.var_cedula_check.set(0)
                     self.var_saldo_cliente.set(0)
                     self.var_aporte_cliente.set(0)
+                    
                     self.saldo_cliente.formatear_valor()
                     self.actualizar_precio_total()
                     
-                    BD_Var.set_valor_ventas_turno(str(value_total_venta))
-                    self.actualizar_valor_vendido(value_total_venta)
                     messagebox.showinfo("LMH SOLUTIONS", "Operacion Exitosa!")
                     
-                except:
-                    messagebox.showerror("LMH SOLUTIONS", """Algo inesperado a ocurrido con la base de datos
-                                        por favor comunicarse con el soporte técnico""")
-        except:
-            messagebox.showerror("LMH SOLUTIONS", "Cedula no encontrada, ,verifique la cedula por defecto")
+                except NameError as e:
+                    messagebox.showerror("LMH SOLUTIONS", e)
+        except NameError as e:
+            messagebox.showerror("LMH SOLUTIONS", e)
                                 
     
     
@@ -309,24 +380,26 @@ class WinOperario(ttk.Frame):
         if self.foco_frame == self.entry_codigo or self.foco_frame == self.entry_nombre_producto:
             try:
                 if self.foco_frame == self.entry_codigo:
-                    values = BD.buscar_producto_cod(self.var_buscar_cod.get())   
-                    self.var_descrip_cod.set(values[0])
-                    self.var_descrip_nombre.set(values[1])
-                    self.var_descrip_precio.set(values[2])
+                    producto = BD.buscar_producto_cod(self.var_buscar_cod.get())   
+                    self.var_descrip_cod.set(producto[ProductoDB.codigo])
+                    self.var_descrip_nombre.set(producto[ProductoDB.nombre])
+                    self.var_descrip_precio.set(producto[ProductoDB.precio])
                     
-                    if values[4] < 1:
-                        messagebox.showwarning("LMH SOLUTIONS", f"El producto {values[1]} debería estar en stock")
+                    if producto[ProductoDB.cantidad] < 5:
+                        messagebox.showwarning("LMH SOLUTIONS", f"El producto {producto[ProductoDB.nombre]} se está agotando del stock")
                     self.var_descrip_cantidad.set(1)
+                    
                     self.agregar_producto()
                     
                 elif self.foco_frame == self.entry_nombre_producto:
-                    values = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
-                    self.var_descrip_cod.set(values[0])
-                    self.var_descrip_nombre.set(values[1])
-                    self.var_descrip_precio.set(values[2])
-                    if values[4] < 1:
-                        messagebox.showwarning("LMH SOLUTIONS", f"El producto {values[1]} debería estar en stock")
-                    self.var_descrip_cantidad.set(1)    
+                    producto = BD.buscar_producto_nombre(self.var_buscar_nombre.get())
+                    self.var_descrip_cod.set(producto[ProductoDB.codigo])
+                    self.var_descrip_nombre.set(producto[ProductoDB.nombre])
+                    self.var_descrip_precio.set(producto[ProductoDB.precio])
+                    if producto[ProductoDB.cantidad] < 1:
+                        messagebox.showwarning("LMH SOLUTIONS", f"El producto {producto[ProductoDB.nombre]} debería estar en stock")
+                    self.var_descrip_cantidad.set(1)
+
                     self.agregar_producto()
                         
             except  ExcepBus as e:  
@@ -395,6 +468,10 @@ class WinOperario(ttk.Frame):
     def actualizar_valor_vendido (self, value):
         self.var_valor_ventido_op.set(value)
         self.valor_vendido_op.formatear_valor()
+        
+    def actualizar_valor_saldo_caja(self, value):
+        self.var_saldo_caja.set(value)
+        self.saldo_caja.formatear_valor()
         
     def format_currency(self,value):
         return "${:,.2f}".format(value)

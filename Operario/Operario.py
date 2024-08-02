@@ -191,8 +191,9 @@ class WinOperario(ttk.Frame):
         
         # Frame lista de productos
         self.frame_lista_producto = ttk.Frame(self)
-        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.cantidad])
+        self.win_lista_producto = ListaProducto(self.frame_lista_producto, self,[Producto.codigo,Producto.nombre, Producto.precio, Producto.cantidad], 100)
         self.frame_lista_producto.grid(row=2, column=0, sticky="nsew")
+        self.expandir_widget(self.frame_lista_producto,row=1, colum=1)
         self.win_lista_producto.bind("<BackSpace>", self.eliminar_producto_auto)
         
         ## Configurar el frame principal del operario
@@ -265,10 +266,10 @@ class WinOperario(ttk.Frame):
             
             Informe.generar_informe_caja(int(ventas_turno), int(saldo_caja), self.lista_nombres)
     
-            # Resetear el valor de las ventas temporales del dia por el operario
-            # self.actualizar_valor_vendido(0)
-            # self.actualizar_valor_saldo_caja(0)
-            # BD_Var.reset_valor_ventas_turno()
+            #Resetear el valor de las ventas temporales del dia por el operario
+            self.actualizar_valor_vendido(0)
+            self.actualizar_valor_saldo_caja(0)
+            BD_Var.reset_valor_ventas_turno()
     
     def vender(self):
         try:
@@ -299,6 +300,7 @@ class WinOperario(ttk.Frame):
                     if (messagebox.askokcancel("LMH SOLUTIONS", "Desea imprimir el ticket?")):
                         self.impresora.plotear_datos(self.dataFrame2listTuple(productos_data_frame), self.var_total.get(), self.var_cedula_check.get())
                     
+                    self.impresora.abrir_caja_cerrar_printer()
                     BD_Var.set_valor_ventas_turno(str(value_total_venta))
                     self.actualizar_valor_vendido(value_total_venta)
                     
