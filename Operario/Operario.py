@@ -299,8 +299,10 @@ class WinOperario(ttk.Frame):
                     # Imprimir la tirilla
                     if (messagebox.askokcancel("LMH SOLUTIONS", "Desea imprimir el ticket?")):
                         self.impresora.plotear_datos(self.dataFrame2listTuple(productos_data_frame), self.var_total.get(), self.var_cedula_check.get())
+                    else:
+                        self.impresora.no_plotear_datos()
                     
-                    self.impresora.abrir_caja_cerrar_printer()
+                    
                     BD_Var.set_valor_ventas_turno(str(value_total_venta))
                     self.actualizar_valor_vendido(value_total_venta)
                     

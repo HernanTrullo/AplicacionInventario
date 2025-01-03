@@ -22,6 +22,11 @@ class TopLevelInformeSocios():
         self.new_window1.geometry("750x600")
         self.new_window1.state("zoomed") 
         
+        self.numero_items_por_frame = 10
+        self.numero_total_paginas = 0;
+        self.numero_pagina = 1
+        self.index_inicial = 0
+        self.index_final = 10
         
         self. var_mod_filtro_cat = tk.StringVar()
         self. var_mod_filtro_time = tk.StringVar()
@@ -54,6 +59,8 @@ class TopLevelInformeSocios():
         
         ## Se campturan los evetos del combobox
         self.entry_mod_categoria.bind("<<ComboboxSelected>>", self.filtro_categoría_cambiada)
+        self.new_window1.bind('<Right>', self.siguiente_pagina)
+        self.new_window1.bind('<Left>', self.anterior_pagina)
         
     def expandir_widget(self, frame:ttk.LabelFrame, row=3, colum=1):
         for i in range(row):
@@ -61,9 +68,9 @@ class TopLevelInformeSocios():
         for i in range(colum):
             frame.columnconfigure(i, weight=1)
     
-    def pintar_datos(self, rot):
+    def pintar_datos(self, rot, categorias_pagina, valores_pagina):
         fig, ax = plt.subplots()
-        bars = ax.bar(range(len(self.categorias)), self.values, tick_label=self.categorias)
+        bars = ax.bar(range(len(categorias_pagina)), valores_pagina, tick_label=categorias_pagina)
         
         # Agregar etiquetas con los valores encima de cada barra
         for bar in bars:
@@ -77,23 +84,24 @@ class TopLevelInformeSocios():
         ax.set_xlabel(self.var_xlabel.get())
         ax.set_ylabel(self.var_xlabel.get())
         ax.set_title(self.var_title.get())
-        ax.set_xticks(range(len(self.categorias)))
-        ax.set_xticklabels(self.categorias, rotation=15, ha='right')
+        ax.set_xticks(range(len(categorias_pagina)))
+        ax.set_xticklabels(categorias_pagina, rotation=15, ha='right')
         
         self.canvas = FigureCanvasTkAgg(fig, self.new_window)
         self.canvas.draw()
         self.canvas.get_tk_widget().grid(row=2, column=0, columnspan=3,sticky="new")
 
     def filtro_categoría_cambiada(self, event):
+        self.index_final = 10
+        self.index_inicial = 0
+        self.numero_pagina = 1
         try:
             categoria =  self.entry_mod_categoria.get()
-            # Se va a crear el gráfico
             if (categoria == self.filtros_cat[0]): # Valor cartera
                 result = BD_Socios.obtener_valor_en_mora_socios()
                 values = [item[UsuarioDB.total_cartera] for item in result]
                 rotacion = 15
             else: # Dias en mora
-                
                 result = BD_Socios.obtener_fechas_en_mora_socios()
                 hoy = datetime.datetime.now()
                 aux_result = []
@@ -110,12 +118,47 @@ class TopLevelInformeSocios():
             
             self.categorias = [item[UsuarioDB.nombre][:16] for item in result]
             self.values = values
+            self.numero_total_paginas = len(values)//10 + 1
             
             self.var_ylabel.set("Pesos")
             self.var_title.set(f"{categoria}: Usuarios")        
-            self.pintar_datos(rotacion)
+            self.pintar_datos(rotacion, self.categorias[self.index_inicial:self.index_final], self.values[self.index_inicial:self.index_final])
             
         except:
             messagebox.showinfo("LMH SOLUTIONS", "No hay clientes en mora")
     
+    def siguiente_pagina(self, event):
+        self.numero_pagina = self.numero_pagina + 1
+        if (self.numero_pagina <= self.numero_total_paginas):
+            self.index_inicial = (self.numero_pagina-1)*self.numero_items_por_frame - 1
+            self.index_final = (self.numero_pagina)*self.numero_items_por_frame
+            
+            numero_items = len(self.values)
+            if (self.index_final > numero_items):
+                self.index_final = numero_items
+                self.index_inicial = numero_items - numero_items%10 - 1
+            
+            self.pintar_datos(15, self.categorias[self.index_inicial:self.index_final], self.values[self.index_inicial:self.index_final])
     
+        else:
+            self.numero_pagina = self.numero_total_paginas
+    def anterior_pagina(self, event):
+        self.numero_pagina = self.numero_pagina - 1
+        if (self.numero_pagina >1):
+            self.index_inicial = (self.numero_pagina-1)*self.numero_items_por_frame - 1
+            self.index_final = (self.numero_pagina)*self.numero_items_por_frame
+            
+            numero_items = len(self.values)
+            if (self.index_final > numero_items):
+                self.index_final = numero_items
+                self.index_inicial = numero_items - numero_items%10 - 1
+            
+            self.pintar_datos(15, self.categorias[self.index_inicial:self.index_final], self.values[self.index_inicial:self.index_final])
+
+        else:
+            self.numero_pagina = 1
+            self.index_inicial = 0
+            self.index_final = 10
+            self.pintar_datos(15, self.categorias[self.index_inicial:self.index_final], self.values[self.index_inicial:self.index_final])
+            
+        

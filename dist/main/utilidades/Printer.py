@@ -79,8 +79,18 @@ class Printer():
         
         for i in range(3):
             self.imprimir_salto_de_linea()
-        
-    def abrir_caja_cerrar_printer(self):
+            
         win32print.WritePrinter(self.hPrinter, b'\x1B\x70\x00\x19\xFA')
         win32print.EndPagePrinter(self.hPrinter)
         win32print.EndDocPrinter(self.hPrinter)
+        
+    
+    def no_plotear_datos(self):
+        self.hJob = win32print.StartDocPrinter(self.hPrinter, 1, ("Lista de Productos", None, "RAW"))
+        win32print.StartPagePrinter(self.hPrinter)
+        
+        win32print.WritePrinter(self.hPrinter, b'\x1B\x70\x00\x19\xFA')
+        win32print.EndPagePrinter(self.hPrinter)
+        win32print.EndDocPrinter(self.hPrinter)
+        
+    
