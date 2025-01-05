@@ -8,14 +8,14 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph,Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph,Spacer, Flowable
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 
 
 class Informe:
     @classmethod
-    def generar_informe_caja(cls,ventas_turno,saldo_caja, lista_nombres):
+    def generar_informe_caja(cls,ventas_turno,saldo_caja, efectivo, saldo_fiado, saldo_pagado,lista_nombres):
         # Crear archivo Excel
         wb = Workbook()
         ws = wb.active
@@ -65,9 +65,14 @@ class Informe:
             style_centered = ParagraphStyle(name='Centered', alignment=TA_CENTER, fontSize=14)
             elements.append(Paragraph(f"<b>Informe de Cierre de Caja</b>", style_centered))
             elements.append(Spacer(1,12))
-            elements.append(Paragraph(f"<b>Total ventas:</b> {ventas_turno}", style_normal))
-            elements.append(Paragraph(f"<b>Total Caja:</b> {saldo_caja}", style_normal))
-            elements.append(Paragraph(f"<b>Total (Ventas + Caja):</b> {ventas_turno + saldo_caja}", style_normal))
+            elements.append(Paragraph(f"<b>Total pagado clientes:</b>"+ "${:,.2f}".format(saldo_pagado), style_normal))
+            
+            elements.append(Paragraph(f"<b>Total de cartera:</b>"+"${:,.2f}".format(saldo_fiado), style_normal))
+            elements.append(Paragraph(f"<b>Total ventas:</b>"+"${:,.2f}".format(ventas_turno), style_normal))
+            elements.append(Spacer(1,12))
+            elements.append(Paragraph(f"<b>Total efectivo:</b>"+"${:,.2f}".format(efectivo), style_normal))
+            elements.append(Paragraph(f"<b>Total Caja:</b>"+ "${:,.2f}".format(saldo_caja), style_normal))
+            elements.append(Paragraph(f"<b>Total (Efectivo + Caja):</b>"+"${:,.2f}".format(efectivo + saldo_caja), style_normal))
             elements.append(Spacer(1,12))
             # Crear una tabla con los productos vendidos
             data = [["Nombre del Producto", "Cantidad"]]  # Encabezados de la tabla

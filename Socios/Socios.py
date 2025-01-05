@@ -6,7 +6,7 @@ from tkinter import messagebox
 import tkinter as tk
 from utilidades.ListaUsuarios import Listausuario, SOCIO
 from BaseDatos.control_bd_socios import BD_Socios as BD
-from BaseDatos.control_bd_variables import BD_Variables
+from BaseDatos.control_bd_variables import BD_Variables as BD_Var
 from utilidades.excepcion import ErrorBusqueda as ExcepBus
 from utilidades.EntryP import LabelP
 import datetime
@@ -132,8 +132,8 @@ class WinSocios(ttk.Frame):
         # Bóton para cargar los datos al inventario, salir y log out y cambio de clave
         self.frame_inventario = ttk.Frame(self)
         
-        self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Guardar Datos Usuarios", command=self.guardar_datos,style="Primary.TButton")
-        self.btn_cargar_inventario.grid(row=0,column=0, sticky="nsew", columnspan=2)
+        self.btn_cargar_inventario = ttk.Button(self.frame_inventario, text="Devolver Productos", command=self.guardar_datos,style="Primary.TButton")
+        self.btn_cargar_inventario.grid(row=2,column=0, sticky="nsew")
         
         self.btn_abonar  = ttk.Button(self.frame_inventario, text="Abonar",command=self.abonar, style="Primary.TButton")
         self.btn_abonar.grid(row=1, column=0,sticky="nsew")
@@ -141,7 +141,7 @@ class WinSocios(ttk.Frame):
         self.btn_quitar_abono.grid(row=1, column=1,sticky="nsew")
         
         self.btn_mostrar_todos  = ttk.Button(self.frame_inventario, text="Obtener Usuarios",command=self.mostrar_users, style="Primary.TButton")
-        self.btn_mostrar_todos.grid(row=2, column=0,sticky="nsew")
+        self.btn_mostrar_todos.grid(row=0, column=0,sticky="nsew", columnspan=2)
         self.btn_mostrar_todos  = ttk.Button(self.frame_inventario, text="Informe Usuario",command=self.obtener_informe_usuarios, style="Primary.TButton")
         self.btn_mostrar_todos.grid(row=2, column=1,sticky="nsew")
         
@@ -170,9 +170,12 @@ class WinSocios(ttk.Frame):
         
     def quitar_abono(self):
         abono = simpledialog.askinteger("LMH SOLUTIONS","Ingrese un valor para quitar abono", initialvalue=0)
-        if(abono>0):
+        if(abono):
             if (abono>0):
                 self.win_lista_socio.abonar_cartera(-abono)
+                self.guardar_datos()
+                BD_Var.set_saldo_efectivo(int(BD_Var.get_saldo_efectivo()) - abono)
+                BD_Var.set_saldo_pagado(int(BD_Var.get_saldo_pagado_clientes()) - abono)
             else:
                 messagebox.showwarning("LMH SOLUTIONS","El valor debe ser positivo")   
     
@@ -181,6 +184,9 @@ class WinSocios(ttk.Frame):
         if(abono):
             if(abono>0):
                 self.win_lista_socio.abonar_cartera(abono)
+                self.guardar_datos()
+                BD_Var.set_saldo_efectivo(int(BD_Var.get_saldo_efectivo()) + abono)
+                BD_Var.set_saldo_pagado(int(BD_Var.get_saldo_pagado_clientes()) + abono)
             else:
                 messagebox.showwarning("LMH SOLUTIONS","El valor debe ser positivo")
     
@@ -191,14 +197,12 @@ class WinSocios(ttk.Frame):
         self.root.select(self.root.tabs()[0])
     
     def guardar_datos(self):
-        resp = messagebox.askokcancel("LMH SOLUTIONS", "Esta seguro que va a guardar los datos?")
-        if (resp):
-            try:
-                BD.guardar_info_usuarios(self.win_lista_socio.retornar_productos())
-                messagebox.showinfo("LMH SOLUTIONS", "Datos guardados correctamente!")
-                self.win_lista_socio.vaciar_productos()
-            except:
-                messagebox.showerror("LMH SOLUTIONS", "Ha ocurrido un error con la base de datos comuniquese con el técnico de soporte")
+        try:
+            BD.guardar_info_usuarios(self.win_lista_socio.retornar_productos())
+            messagebox.showinfo("LMH SOLUTIONS", "Datos guardados correctamente")
+            self.win_lista_socio.vaciar_productos()
+        except:
+            messagebox.showerror("LMH SOLUTIONS", "Ha ocurrido un error con la base de datos comuniquese con el técnico de soporte")
         
     def salir(self):
         self.app.on_close()

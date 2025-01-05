@@ -35,6 +35,7 @@ class StyleAPP:
         
         # Estilo TFRAME de cabecera
         self.style.configure("Cabecera.TFrame", background=bg_gen)
+        self.style.configure("WindowInforme.TFrame", background=fr_lb_cab)
         
         self.style.configure("TCombobox",
                 fieldbackground="white",

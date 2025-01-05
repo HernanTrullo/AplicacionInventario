@@ -30,7 +30,9 @@ class Printer():
     def imprimir_cabecera(self):
         ## Se construye la cabecera
         output_string = f"""|          Surti Hogar        |\n""".encode('utf-8')
-        # Enviar datos a la impresora
+        win32print.WritePrinter(self.hPrinter, output_string)
+        
+        output_string = f"""|          Surti Hogar        |\n""".encode('utf-8')
         win32print.WritePrinter(self.hPrinter, output_string)
         
         ## LA fecha

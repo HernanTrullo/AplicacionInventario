@@ -9,14 +9,18 @@ class VentaEstructuraSql:
     total_comprado = "Total_Comprado"
     productos_vendidos = "Productos_Vendidos"
     utilidad = "Utilidad"
+    id_cliente = "Id_cliente"
+    es_cartera = "Es_cartera"
     
 class VentaModel():
-    def __init__(self,id=None, fecha=None,total_vendido=None, total_comprado=None, productos_vendidos= None):
+    def __init__(self,id=None, fecha=None,total_vendido=None, total_comprado=None, productos_vendidos= None, id_cliente="0", es_cartera=0):
         self.id = id
         self.fecha = fecha
         self.total_vendido = total_vendido
         self.total_comprado = total_comprado
         self.productos_vendidos = productos_vendidos
+        self.id_cliente = id_cliente
+        self.es_cartera = es_cartera
         
 class VentasSql():
     name_bd = "./BaseDatos/BaseDatos.db"
@@ -24,8 +28,8 @@ class VentasSql():
     @classmethod
     def agregar_venta(cls, venta_objet:VentaModel):
         str = f'''
-        INSERT INTO Ventas ({VentaEstructuraSql.fecha}, {VentaEstructuraSql.total_vendido}, {VentaEstructuraSql.total_comprado}, {VentaEstructuraSql.productos_vendidos})
-        VALUES (?, ?, ?, ?)
+        INSERT INTO Ventas ({VentaEstructuraSql.fecha}, {VentaEstructuraSql.total_vendido}, {VentaEstructuraSql.total_comprado}, {VentaEstructuraSql.productos_vendidos}, {VentaEstructuraSql.id_cliente}, {VentaEstructuraSql.es_cartera})
+        VALUES (?, ?, ?, ?, ?, ?)
         '''
         str2 = f"""
         UPDATE Ventas
@@ -33,7 +37,7 @@ class VentasSql():
         """
         conn = sqlite3.connect(cls.name_bd)
         cursor = conn.cursor()
-        cursor.execute(str, (venta_objet.fecha, venta_objet.total_vendido, venta_objet.total_comprado, venta_objet.productos_vendidos))
+        cursor.execute(str, (venta_objet.fecha, venta_objet.total_vendido, venta_objet.total_comprado, venta_objet.productos_vendidos, venta_objet.id_cliente, venta_objet.es_cartera))
         cursor.execute(str2)
         conn.commit()
         conn.close()

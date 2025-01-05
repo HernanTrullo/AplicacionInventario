@@ -46,7 +46,10 @@ class WinAdmin(ttk.Frame):
         self.var_total_vendido = tk.StringVar()
         self.var_valor_ventido_op = IntVar()
         
-        self.var_saldo_caja = tk.IntVar()
+        self.var_saldo_efectivo = tk.IntVar()
+        self.var_saldo_fiado = tk.IntVar()
+        self.var_saldo_pagado = tk.IntVar()
+        
         self.value_ocultar =True
         
         self.foco_frame = None
@@ -58,14 +61,14 @@ class WinAdmin(ttk.Frame):
         
         
         # Inicializar variables
-        self.actualizar_valor_vendido(BD_Variables.get_valor_ventas_turno())
-        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
-        
         self.bind("<FocusIn>", self.actualizar)
+        self.actualizar(0)
     
     def actualizar(self, event):
-        self.actualizar_valor_vendido(BD_Variables.get_valor_ventas_turno())
-        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
+        self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
+        self.actualizar_saldo_efectivo(BD_Var.get_saldo_efectivo())
+        self.actualizar_saldo_fiado(BD_Var.get_saldo_fiado())
+        self.actualizar_saldo_pagado_clientes(BD_Var.get_saldo_pagado_clientes())
         
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
@@ -86,17 +89,27 @@ class WinAdmin(ttk.Frame):
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora, style="CCustomSmall.TLabel")
         self.hora.grid(row=2, column=1)
         
-        self.lb_saldo_caja = ttk.Label(self.top_frame, text="Saldo Caja ", style="CCustomLarge.TLabel")
-        self.lb_saldo_caja.grid(row=2, column=2)
-        self.saldo_caja = LabelP(self.top_frame, textvariable=self.var_saldo_caja, style="CCustomLarge.TLabel")
-        self.saldo_caja.grid(row=2, column=3)
-        
-        self.lb_valor_vendido_op =  ttk.Label(self.top_frame, text="Valor Vendido: ", style="CCustomMedium.TLabel")
+        self.lb_valor_vendido_op =  ttk.Label(self.top_frame, text="Vendido: ", style="CCustomSmall.TLabel")
         self.lb_valor_vendido_op.grid(row=0, column=2, padx=10)
-        self.valor_vendido_op = LabelP(self.top_frame, textvariable=self.var_valor_ventido_op, style="CCustomMedium.TLabel")
+        self.valor_vendido_op = LabelP(self.top_frame, textvariable=self.var_valor_ventido_op, style="CCustomSmall.TLabel")
         self.valor_vendido_op.grid(row=0, column=3, padx=10)
-        # Asociar el evento de clic al Label
         self.lb_valor_vendido_op.bind("<Button-1>", lambda event: self.toggle_visibility())
+        
+        self.lb_efectivo = ttk.Label(self.top_frame, text="Efectivo: ", style="CCustomSmall.TLabel")
+        self.lb_efectivo.grid(row=1, column=2)
+        self.saldo_efectivo = LabelP(self.top_frame, textvariable=self.var_saldo_efectivo, style="CCustomSmall.TLabel")
+        self.saldo_efectivo.grid(row=1, column=3)
+        
+        self.lb_fiado = ttk.Label(self.top_frame, text="Fiado: ", style="CCustomSmall.TLabel")
+        self.lb_fiado.grid(row=2, column=2)
+        self.saldo_fiado = LabelP(self.top_frame, textvariable=self.var_saldo_fiado, style="CCustomSmall.TLabel")
+        self.saldo_fiado.grid(row=2, column=3)
+        
+        self.lb_pagado = ttk.Label(self.top_frame, text="Deudas pagadas: ", style="CCustomSmall.TLabel")
+        self.lb_pagado.grid(row=3, column=2)
+        self.saldo_pagado = LabelP(self.top_frame, textvariable=self.var_saldo_pagado, style="CCustomSmall.TLabel")
+        self.saldo_pagado.grid(row=3, column=3)
+        
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
         
@@ -136,7 +149,7 @@ class WinAdmin(ttk.Frame):
         
         self.btn_cierre_caja  = ttk.Button(self.frame3_caja, text="Informe de Caja",command=self.cierre_de_caja_infome, style="Primary.TButton")
         self.btn_cierre_caja.grid(row=0, column=0,sticky="nsew")
-        self.btn_asignar_saldo_caja = ttk.Button(self.frame3_caja, text="Asignar Saldo Caja", command=self.asignar_saldo_caja, style="Primary.TButton")
+        self.btn_asignar_saldo_caja = ttk.Button(self.frame3_caja, text="Ver/asignar saldo caja", command=self.asignar_saldo_caja, style="Primary.TButton")
         self.btn_asignar_saldo_caja.grid(row=1, column=0, sticky="nsew")
         
         self.btn_salir  = ttk.Button(self.frame1_usuario, text="Salir",command=self.salir, style="Primary.TButton")
@@ -349,22 +362,32 @@ class WinAdmin(ttk.Frame):
             
             
     def asignar_saldo_caja(self):
-        resp = messagebox.askokcancel("LMH SOLUTIONS", "Va a asignar un saldo de caja,\n¿está seguro que desea hacerlo?")
+        resp = messagebox.askokcancel("LMH SOLUTIONS", f"Saldo de caja actual {BD_Var.get_saldo_caja()},\n¿Está seguro que desea cambiar el saldo de caja?")
         if resp:
             resp = simpledialog.askinteger("LMH SOLUTIONS", "Digite el saldo en caja con el que va a iniciar")
             if resp:
-                self.actualizar_valor_saldo_caja(resp)
-                
-                BD_Var.set_saldo_caja(self.var_saldo_caja.get())
-                messagebox.showinfo("LMH SOLUTIONS", "Saldo añadido correctamente")
+                BD_Var.set_saldo_caja(resp)
+                messagebox.showinfo("LMH SOLUTIONS", f"Saldo actual {BD_Var.get_saldo_caja()}, insertado correctamente")
                 
 
     def cierre_de_caja_infome(self):
-        self.win_caja = WinCaja(self, BD_Var.get_saldo_caja(), BD_Var.get_valor_ventas_turno())
+        self.win_caja = WinCaja(self, BD_Var.get_saldo_caja(), BD_Var.get_valor_ventas_turno(), BD_Var.get_saldo_efectivo(), BD_Var.get_saldo_pagado_clientes())
     
     def actualizar_valor_vendido (self, value):
         self.var_valor_ventido_op.set(value)
         self.valor_vendido_op.formatear_valor()
+        
+    def actualizar_saldo_efectivo(self, value):
+        self.var_saldo_efectivo.set(value)
+        self.saldo_efectivo.formatear_valor()
+        
+    def actualizar_saldo_fiado(self, value):
+        self.var_saldo_fiado.set(value)
+        self.saldo_fiado.formatear_valor()
+        
+    def actualizar_saldo_pagado_clientes(self, value):
+        self.var_saldo_pagado.set(value)
+        self.saldo_pagado.formatear_valor()
     
     def controlador_de_foco(self, event):
         self.foco_frame = event.widget
@@ -544,6 +567,3 @@ class WinAdmin(ttk.Frame):
         self.out_total.formatear_valor() # Formato de peso
         self.out_total_vendido.formatear_valor() # Formato de peso
         
-    def actualizar_valor_saldo_caja(self, value):
-        self.var_saldo_caja.set(value)
-        self.saldo_caja.formatear_valor()

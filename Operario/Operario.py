@@ -54,7 +54,11 @@ class WinOperario(ttk.Frame):
         self.var_aporte_cliente = IntVar()
         self.var_saldo_cliente = IntVar()
         
-        self.var_saldo_caja = tk.IntVar()
+        
+        self.var_saldo_efectivo = tk.IntVar()
+        self.var_saldo_fiado = tk.IntVar()
+        self.var_saldo_pagado = tk.IntVar()
+        
         self.var_cedula_check = tk.StringVar()
         
         self.var_es_cartera = tk.BooleanVar()
@@ -66,13 +70,15 @@ class WinOperario(ttk.Frame):
         self.pack(fill="both", expand=True)
         
         # Inicializar variables
-        self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
-        
+        self.actualizar(0)
         self.bind("<FocusIn>", self.actualizar)
         
     def actualizar(self, event):
         self.actualizar_valor_vendido(BD_Var.get_valor_ventas_turno())
-        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
+        self.actualizar_saldo_efectivo(BD_Var.get_saldo_efectivo())
+        self.actualizar_saldo_fiado(BD_Var.get_saldo_fiado())
+        self.actualizar_saldo_pagado_clientes(BD_Var.get_saldo_pagado_clientes())
+        
         
     def create_widget(self):
         # Frame que contiene el nombre del operario e información básica
@@ -83,9 +89,9 @@ class WinOperario(ttk.Frame):
         self.nombre_op = ttk.Label(self.top_frame, textvariable=self.var_nombre_op, style="CCustomMedium.TLabel")
         self.nombre_op.grid(row=0, column=1)
         
-        self.lb_valor_vendido_op =  ttk.Label(self.top_frame, text="Valor Vendido: ", style="CCustomMedium.TLabel")
+        self.lb_valor_vendido_op =  ttk.Label(self.top_frame, text="Vendido: ", style="CCustomSmall.TLabel")
         self.lb_valor_vendido_op.grid(row=0, column=2, padx=10)
-        self.valor_vendido_op = LabelP(self.top_frame, textvariable=self.var_valor_ventido_op, style="CCustomMedium.TLabel")
+        self.valor_vendido_op = LabelP(self.top_frame, textvariable=self.var_valor_ventido_op, style="CCustomSmall.TLabel")
         self.valor_vendido_op.grid(row=0, column=3, padx=10)
         self.lb_valor_vendido_op.bind("<Button-1>", lambda event: self.toggle_visibility())
             
@@ -99,10 +105,20 @@ class WinOperario(ttk.Frame):
         self.hora = ttk.Label(self.top_frame, textvariable=self.var_hora, style="CCustomSmall.TLabel")
         self.hora.grid(row=2, column=1)
         
-        self.lb_saldo_caja = ttk.Label(self.top_frame, text="Saldo Caja ", style="CCustomLarge.TLabel")
-        self.lb_saldo_caja.grid(row=2, column=2)
-        self.saldo_caja = LabelP(self.top_frame, textvariable=self.var_saldo_caja, style="CCustomLarge.TLabel")
-        self.saldo_caja.grid(row=2, column=3)
+        self.lb_efectivo = ttk.Label(self.top_frame, text="Efectivo: ", style="CCustomSmall.TLabel")
+        self.lb_efectivo.grid(row=1, column=2)
+        self.saldo_efectivo = LabelP(self.top_frame, textvariable=self.var_saldo_efectivo, style="CCustomSmall.TLabel")
+        self.saldo_efectivo.grid(row=1, column=3)
+        
+        self.lb_fiado = ttk.Label(self.top_frame, text="Fiado: ", style="CCustomSmall.TLabel")
+        self.lb_fiado.grid(row=2, column=2)
+        self.saldo_fiado = LabelP(self.top_frame, textvariable=self.var_saldo_fiado, style="CCustomSmall.TLabel")
+        self.saldo_fiado.grid(row=2, column=3)
+        
+        self.lb_pagado = ttk.Label(self.top_frame, text="Deudas pagadas: ", style="CCustomSmall.TLabel")
+        self.lb_pagado.grid(row=3, column=2)
+        self.saldo_pagado = LabelP(self.top_frame, textvariable=self.var_saldo_pagado, style="CCustomSmall.TLabel")
+        self.saldo_pagado.grid(row=3, column=3)
         
         self.top_frame.grid(row=0,column=0, sticky="nsew")
         
@@ -153,7 +169,7 @@ class WinOperario(ttk.Frame):
         self.saldo_cliente = LabelP(self.frame_calculo_cuenta, textvariable=self.var_saldo_cliente, style="CCustomMedium.TLabel")
         self.saldo_cliente.grid(row = 1, column=1)
         
-        self.lb_cedula_check = ttk.Label(self.frame_calculo_cuenta, text="Cédula Cliente", style="CCustomMedium.TLabel").grid(row=2, column=0)
+        self.lb_cedula_check = ttk.Label(self.frame_calculo_cuenta, text="Código Cliente", style="CCustomMedium.TLabel").grid(row=2, column=0)
         self.cedula_check = ttk.Combobox(self.frame_calculo_cuenta, textvariable=self.var_cedula_check)
         self.cedula_check.grid(row=2, column=1)
         self.cedula_check.bind("<KeyRelease>", self.buscar_cedula)
@@ -213,8 +229,6 @@ class WinOperario(ttk.Frame):
         self.var_fecha.set(datetime.date.today().strftime('%d/%m/%Y'))
         self.actualizar_hora()
         
-        # Actualizar el saldo de caja
-        self.actualizar_valor_saldo_caja(int(BD_Var.get_saldo_caja()))
     
     def toggle_visibility(self):
         if self.value_ocultar:
@@ -252,6 +266,9 @@ class WinOperario(ttk.Frame):
             try:
                 saldo_caja = BD_Var.get_saldo_caja() 
                 ventas_turno = BD_Var.get_valor_ventas_turno()
+                efectivo = BD_Var.get_saldo_efectivo()
+                saldo_fiado = BD_Var.get_saldo_fiado()
+                saldo_pagado = BD_Var.get_saldo_pagado_clientes()
                 
                 fecha = datetime.datetime.now().strftime("%Y-%m-%d")
                 codigos_json = VentasSql.retornar_codigo_productos_vendidos(fecha)
@@ -264,12 +281,10 @@ class WinOperario(ttk.Frame):
             except ExcepBus as e:
                 messagebox.showinfo("LMH SOLUTIOS", "No se han encontrado ventas en las fechas establecidas")
             
-            Informe.generar_informe_caja(int(ventas_turno), int(saldo_caja), self.lista_nombres)
-    
+            Informe.generar_informe_caja(int(ventas_turno), int(saldo_caja),int(efectivo) , int(saldo_fiado), int(saldo_pagado),self.lista_nombres)
             #Resetear el valor de las ventas temporales del dia por el operario
-            self.actualizar_valor_vendido(0)
-            self.actualizar_valor_saldo_caja(0)
             BD_Var.reset_valor_ventas_turno()
+            self.actualizar(0)
     
     def vender(self):
         try:
@@ -279,15 +294,20 @@ class WinOperario(ttk.Frame):
                 try:
                     productos_data_frame =  self.win_lista_producto.retornar_productos()
                     BD.sacar_productos(productos_data_frame) # Se sacan los productos de la bases de datos
-                    
                     valor_comprado_stock =   BD.retornar_valor_compras_stock(productos_data_frame)
-                    
                     value_total_venta = int(BD_Var.get_valor_ventas_turno()) + self.var_total.get() # Valor total de ventas del turno
+                    
                     #Se actualizan las variables de afiliado
                     values_socio[3] = self.var_total.get() + values_socio[3]
                     valor_cartera = values_socio[2]
                     if (self.var_es_cartera.get()):
                         values_socio[2] = valor_cartera + self.var_total.get() # valor cartera
+                        BD_Var.set_saldo_fiado(int(BD_Var.get_saldo_fiado()) + self.var_total.get())
+                        self.actualizar_saldo_fiado(int(BD_Var.get_saldo_fiado()))
+                    else:
+                        BD_Var.set_saldo_efectivo(int(BD_Var.get_saldo_efectivo()) + self.var_total.get())
+                        self.actualizar_saldo_efectivo(int(BD_Var.get_saldo_efectivo()))
+                        
                     dict_u= {
                         SOCIO_US.cedula: values_socio[0],
                         SOCIO_US.nombre: values_socio[1],
@@ -306,6 +326,7 @@ class WinOperario(ttk.Frame):
                     BD_Var.set_valor_ventas_turno(str(value_total_venta))
                     self.actualizar_valor_vendido(value_total_venta)
                     
+                    
                     # Set del valor de compra de los articulos
                     BD_Var.set_valor_comprado_stock(valor_comprado_stock + int(BD_Var.get_valor_comprado_stock()))
                     # Enviar datos venta a la base de datos
@@ -317,8 +338,13 @@ class WinOperario(ttk.Frame):
                     fecha_ac = datetime.datetime.now().strftime("""%Y-%m-%d""")
                     tot_vendido = self.var_total.get()
                     tot_comprado = valor_comprado_stock
-                
-                    venta = VentaModel(fecha=fecha_ac, total_vendido= tot_vendido, total_comprado= tot_comprado, productos_vendidos= utl.dictToJson(lista_productos))
+
+                    venta = VentaModel(fecha=fecha_ac, 
+                                        total_vendido= tot_vendido, 
+                                        total_comprado= tot_comprado, 
+                                        productos_vendidos= utl.dictToJson(lista_productos), 
+                                        id_cliente=self.var_cedula_check.get(), 
+                                        es_cartera= self.var_es_cartera.get())    
                     VentasSql.agregar_venta(venta)
                     
                     self.win_lista_producto.vaciar_productos()
@@ -471,12 +497,17 @@ class WinOperario(ttk.Frame):
         self.var_valor_ventido_op.set(value)
         self.valor_vendido_op.formatear_valor()
         
-    def actualizar_valor_saldo_caja(self, value):
-        self.var_saldo_caja.set(value)
-        self.saldo_caja.formatear_valor()
+    def actualizar_saldo_efectivo(self, value):
+        self.var_saldo_efectivo.set(value)
+        self.saldo_efectivo.formatear_valor()
         
-    def format_currency(self,value):
-        return "${:,.2f}".format(value)
+    def actualizar_saldo_fiado(self, value):
+        self.var_saldo_fiado.set(value)
+        self.saldo_fiado.formatear_valor()
+        
+    def actualizar_saldo_pagado_clientes(self, value):
+        self.var_saldo_pagado.set(value)
+        self.saldo_pagado.formatear_valor()
 
 
 

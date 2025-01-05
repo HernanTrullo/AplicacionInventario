@@ -11,7 +11,7 @@ from tkinter import messagebox
 from utilidades.excepcion import ErrorBusqueda
 
 class TopLevelWinCierreCaja:
-    def __init__(self, parent, saldo, ventas):
+    def __init__(self, parent, saldo, ventas, efectivo, valor_pagado):
         self.new_window1 = tk.Toplevel(parent)
         self.new_window1.title("Cierre de Caja")
         self.new_window1.geometry("700x500")
@@ -22,6 +22,9 @@ class TopLevelWinCierreCaja:
         self.var_ventas_diarias = tk.IntVar()
         self.var_saldo = tk.IntVar()
         self.var_ventas_saldo = tk.IntVar()
+        self.var_saldo_efectivo = tk.IntVar()
+        self.var_saldo_pagado = tk.IntVar()
+        
         self.var_buscar_nombre = tk.StringVar()
         self.var_cantidad = tk.StringVar()
         
@@ -37,21 +40,30 @@ class TopLevelWinCierreCaja:
         self.ventas_diarias = LabelP(self.new_window, self.var_ventas_diarias, style="CCustomMedium.TLabel");
         self.ventas_diarias.grid(row=1, column=1, sticky="nse")
         
-        self.lb_saldo_diario = ttk.Label(self.new_window, text="Total (Saldo Caja): ", style="CCustomMedium.TLabel").grid(row=2, column=0, sticky="e")
+        self.lb_saldo_diario_pagado = ttk.Label(self.new_window, text="Valor pagado clientes: ", style="CCustomMedium.TLabel").grid(row=2, column=0, sticky="e")
+        self.saldo_diario_pagado = LabelP(self.new_window, self.var_saldo_pagado, style="CCustomMedium.TLabel");
+        self.saldo_diario_pagado.grid(row=2, column=1, sticky="nse")
+        
+        self.lb_saldo_diario = ttk.Label(self.new_window, text="Saldo Caja: ", style="CCustomMedium.TLabel").grid(row=3, column=0, sticky="e")
         self.saldo_diario = LabelP(self.new_window, self.var_saldo, style="CCustomMedium.TLabel");
-        self.saldo_diario.grid(row=2, column=1, sticky="nse") 
+        self.saldo_diario.grid(row=3, column=1, sticky="nse")
         
-        self.lb_ventas_saldo = ttk.Label(self.new_window, text="Total (Ventas + Saldo): ",style="CCustomMedium.TLabel").grid(row=3, column=0, sticky="e")
+        self.lb_saldo_diario_efectivo = ttk.Label(self.new_window, text="Saldo efectivo: ", style="CCustomMedium.TLabel").grid(row=4, column=0, sticky="e")
+        self.saldo_diario_efectivo = LabelP(self.new_window, self.var_saldo_efectivo, style="CCustomMedium.TLabel");
+        self.saldo_diario_efectivo.grid(row=4, column=1, sticky="nse")
+        
+        self.lb_ventas_saldo = ttk.Label(self.new_window, text="Total Caja (Efectivo + Saldo caja): ",style="CCustomMedium.TLabel").grid(row=5, column=0, sticky="e")
         self.ventas_saldo = LabelP(self.new_window, self.var_ventas_saldo, style="CCustomMedium.TLabel");
-        self.ventas_saldo.grid(row=3, column=1, sticky="nse") 
+        self.ventas_saldo.grid(row=5, column=1, sticky="nse") 
         
-        # Puedes agregar más widgets aquí si lo deseas
         self.var_ventas_diarias.set(ventas)
         self.var_saldo.set(saldo)
-        self.var_ventas_saldo.set(int(ventas)+int(saldo))
+        self.var_saldo_efectivo.set(efectivo)
+        self.var_saldo_pagado.set(valor_pagado)
+        self.var_ventas_saldo.set(int(efectivo)+int(saldo))
         
         self.formatear_variables()
-        self.expandir_widget(self.new_window, row=4, colum=3)
+        self.expandir_widget(self.new_window, row=6, colum=3)
         
         self.var_cantidad.set("Cant: 0")
         self.actualizar_nombre_productos()
@@ -60,6 +72,8 @@ class TopLevelWinCierreCaja:
         self.ventas_diarias.formatear_valor()
         self.saldo_diario.formatear_valor()
         self.ventas_saldo.formatear_valor()
+        self.saldo_diario_efectivo.formatear_valor()
+        self.saldo_diario_pagado.formatear_valor()
     
     def expandir_widget(self, frame:ttk.LabelFrame, row=2, colum=2):
         for i in range(row):

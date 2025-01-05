@@ -6,7 +6,6 @@ from BaseDatos.control_bd_socios import UsuarioDB as SOCIO
 
 
 class Listausuario(ttk.Treeview):
-    
     def __init__(self, root, win,col):
         self.df = pd.DataFrame()
         for column in col:
