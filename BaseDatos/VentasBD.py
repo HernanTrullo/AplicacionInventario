@@ -121,4 +121,70 @@ class VentasSql():
             return [item[0] for item in res] # Voy a retornar los productos vendidos
         else:
             raise E("Fecha no encontrada")
+        
+    @classmethod
+    def retornar_idVenta_fecha_productos_es_cartera(cls,id_cliente, fecha= None):
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        if fecha:
+        # Consulta SQL
+            str = f"""
+                SELECT {VentaEstructuraSql.id}, {VentaEstructuraSql.fecha}, {VentaEstructuraSql.productos_vendidos}, {VentaEstructuraSql.es_cartera}
+                FROM Ventas
+                WHERE {VentaEstructuraSql.id_cliente} = ? AND {VentaEstructuraSql.fecha} = ?
+            """
+            res = cur.execute(str, (id_cliente,fecha,))
+        else:
+            str = f"""
+                SELECT {VentaEstructuraSql.id}, {VentaEstructuraSql.fecha}, {VentaEstructuraSql.productos_vendidos}, {VentaEstructuraSql.es_cartera}
+                FROM Ventas
+                WHERE {VentaEstructuraSql.id_cliente} = ?
+            """
+            res = cur.execute(str, (id_cliente,))
+        
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res) >0:
+            return res
+        else:
+            raise E("Ventas no encontradas")
+        
+    @classmethod
+    def modificar_venta_por_idVenta(cls, id_venta, productos_vendidos, total_vendido, total_comprado):
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        
+        str = f"""  UPDATE Ventas
+                    SET {VentaEstructuraSql.productos_vendidos} = ?, {VentaEstructuraSql.total_vendido}=?, {VentaEstructuraSql.total_comprado}=?
+                    WHERE {VentaEstructuraSql.id} = ?"""
+        
+        str2 = f"""
+                    UPDATE Ventas
+                    SET {VentaEstructuraSql.utilidad} = {VentaEstructuraSql.total_vendido} - {VentaEstructuraSql.total_comprado};
+        """
+        
+        cur.execute(str, (productos_vendidos, total_vendido, total_comprado, id_venta))
+        cur.execute(str2)
+        conn.commit()
+        conn.close()
+        
+    @classmethod
+    def retornar_productos_vendidos_por_idVenta(cls, id_venta):
+        conn = sqlite3.connect(cls.name_bd)
+        cur = conn.cursor()
+        
+        str = f"""  SELECT {VentaEstructuraSql.productos_vendidos} FROM Ventas
+                    WHERE {VentaEstructuraSql.id} = ?"""
+        
+        res = cur.execute(str, (id_venta,))
+        res = res.fetchall()
+        conn.close()
+        
+        if len(res) >0:
+            return res[0][0]
+        else:
+            raise E("Ventas no encontradas")
+        
+    
     

@@ -20,6 +20,7 @@ from utilidades.Printer import Printer
 from TopLevels.WinCierreCaja import TopLevelWinCierreCaja as WinCaja
 from TopLevels.WinInformeVentas import TopLevelInformeVentas as WinVentasInforme
 from TopLevels.WinInformeProductos import TopLevelInformeProductos as WinProductoInforme
+from TopLevels.WinVentasProductos import TopLevelWinVentasProductos as WinVentasProductos
 
 class WinAdmin(ttk.Frame):
     def __init__(self, root:ttk.Notebook, app):
@@ -298,16 +299,10 @@ class WinAdmin(ttk.Frame):
             self.value_ocultar = True
     
     def devolver_valor_vendido(self):
-        resp = messagebox.askokcancel("LMH SOLUTIONS", "¿Está seguro que desea devolver el valor vendido?")
-        if (resp):
-            valor_resto = simpledialog.askinteger("LMH SOLUTIONS", "Ingrese el valor a devolver")
-            value_actualizado = self.var_valor_ventido_op.get() - valor_resto
-            value_actualizado_r = "${:,.2f}".format(value_actualizado)
-            resp = messagebox.askokcancel("LMH SOLUTIONS", f"El valor actualizado es: {value_actualizado_r}")
-            if (resp):
-                BD_Var.set_valor_ventas_turno(str(value_actualizado))
-                self.actualizar_valor_vendido(value_actualizado)
-                messagebox.showinfo("LMH SOLUTIONS", "Operación Exitosa!")
+        resp = messagebox.askokcancel("LMH SOLUTIONS", "¿Está seguro que desea devolver los productos?")
+        if resp:
+            self.win_ventas_productos = WinVentasProductos(self)
+        
 
     def mesaje (self):
         num = 0

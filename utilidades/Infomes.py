@@ -93,8 +93,6 @@ class Informe:
             ]))
 
             elements.append(table)
-
-            # Construir el PDF
             pdf.build(elements)
         
         messagebox.showinfo("LMH SOLUTIOS", f"El informe de ventas ha sido guardado")

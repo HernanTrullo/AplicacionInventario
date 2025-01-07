@@ -12,6 +12,8 @@ class Producto:
     precio_entrada = "Precio_Entrada"
     sub_total = "Sub_Total"
     categoria = "Categoria"
+    fecha_venta = "Fecha_Venta"
+    es_cartera = "Es_cartera"
     
 
 

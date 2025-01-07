@@ -1,11 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
-from BaseDatos.InventarioBD import BD_Inventario as BD, ProductoDB
-from BaseDatos.VentasBD import VentasSql
+from BaseDatos.InventarioBD import BD_Inventario as BD
 from utilidades.EntryP import LabelP
 from datetime import datetime
-import utilidades.generc as utl
-from BaseDatos.VentasBD import VentasSql, VentaEstructuraSql
+from BaseDatos.VentasBD import VentasSql
 import TopLevels.controller as controller
 from tkinter import messagebox
 from utilidades.excepcion import ErrorBusqueda
